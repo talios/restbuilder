@@ -1,0 +1,36 @@
+package com.example.rebuilder;
+
+namespace example;
+
+/**
+ * Request the provision of a given referenced resource.  Provisioning requires a starting fromDate to be defined.
+ */
+operation provision {
+  attribute string displayName;
+  attribute datetime fromDate;
+}
+
+/**
+ * Request the cancellation of a given resource.
+ */
+operation cancellation {
+  attribute datetime thruDate;
+}
+
+/**
+ * This is the account resource.
+ */
+resource account {
+  attribute integer id;
+  attribute string displayName;
+  attribute datetime fromDate;
+  attribute datetime thruDate;
+
+  operation cancellation;
+
+  operation notify {
+    attribute string message;
+  }
+
+}
+
