@@ -16,8 +16,10 @@ package com.theoryinpractise.restbuilder.mojo;
  * limitations under the License.
  */
 
-import com.sun.codemodel.internal.JCodeModel;
+import com.sun.codemodel.JClassAlreadyExistsException;
+import com.sun.codemodel.JCodeModel;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
+import com.theoryinpractise.restbuilder.codegen.restlet.RestletCodeGenerator;
 import com.theoryinpractise.restbuilder.parser.RestBuilder;
 import com.theoryinpractise.restbuilder.parser.model.RestModel;
 import org.apache.maven.plugin.AbstractMojo;
@@ -52,19 +54,16 @@ public class RestBuilderMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException {
 
-
         try {
             processResourceFilesInDirectory(resourceDir);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
 
-        //
-
     }
 
-    private void processResourceFilesInDirectory(File resourceDir) throws IOException {
+    private void processResourceFilesInDirectory(File resourceDir) throws IOException, JClassAlreadyExistsException {
 
         File[] files = resourceDir.listFiles();
         for (File file : files) {
@@ -80,21 +79,18 @@ public class RestBuilderMojo extends AbstractMojo {
 
     }
 
-    private void processResourceFile(File file) throws IOException {
+    private void processResourceFile(File file) throws IOException, JClassAlreadyExistsException {
 
         RestBuilder restBuilder = new RestBuilder();
-
         RestModel model = restBuilder.buildModel(file);
-
-
         JCodeModel jCodeModel = new JCodeModel();
+        CodeGenerator codeGenerator = new RestletCodeGenerator();
 
-        CodeGenerator codeGenerator = null;
+        codeGenerator.generate(jCodeModel, model);
 
         generatedSourceDirectory.mkdirs();
 
-        codeGenerator.generate(jCodeModel, model, generatedSourceDirectory);
-
+        jCodeModel.build(generatedSourceDirectory);
 
 //        getLog().info("Found resource in package: " + model.getPackage());
 //        for (RestResource resource : model.getResources()) {
