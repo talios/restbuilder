@@ -16,9 +16,10 @@ package com.theoryinpractise.restbuilder.mojo;
  * limitations under the License.
  */
 
+import com.sun.codemodel.internal.JCodeModel;
+import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.parser.RestBuilder;
 import com.theoryinpractise.restbuilder.parser.model.RestModel;
-import com.theoryinpractise.restbuilder.parser.model.RestResource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -86,10 +87,19 @@ public class RestBuilderMojo extends AbstractMojo {
         RestModel model = restBuilder.buildModel(file);
 
 
-        getLog().info("Found resource in package: " + model.getPackage());
-        for (RestResource resource : model.getResources()) {
-            getLog().info(" - " + resource.getName());
-        }
+        JCodeModel jCodeModel = new JCodeModel();
+
+        CodeGenerator codeGenerator = null;
+
+        generatedSourceDirectory.mkdirs();
+
+        codeGenerator.generate(jCodeModel, model, generatedSourceDirectory);
+
+
+//        getLog().info("Found resource in package: " + model.getPackage());
+//        for (RestResource resource : model.getResources()) {
+//            getLog().info(" - " + resource.getName());
+//        }
 
 
     }
