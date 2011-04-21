@@ -10,4 +10,33 @@
     <version>1.0.1-SNAPSHOT</version>
     <url>https://github.com/talios/restbuilder</url>
     <packaging>pom</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r09</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+    <modules>
+        <module>restbuilder-parser</module>
+    </modules>
 </project>
