@@ -24,6 +24,7 @@ import com.theoryinpractise.restbuilder.parser.RestBuilder;
 import com.theoryinpractise.restbuilder.parser.model.RestModel;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,14 @@ import java.io.IOException;
  */
 public class RestBuilderMojo extends AbstractMojo {
 
+    /**
+       * @parameter expression="${project}"
+       * @required
+       * @readonly
+       * @since 1.0
+       */
+      private MavenProject project;
+
 
     /**
      * @parameter expression="${basedir}/src/main/resources"
@@ -46,7 +55,7 @@ public class RestBuilderMojo extends AbstractMojo {
     /**
      * Location of the generated source files.
      *
-     * @parameter default-value="${project.build.outputDirectory}/../generated-sources"
+     * @parameter default-value="${project.build.directory}/generated-sources/restbuilder"
      * @required
      */
     private File generatedSourceDirectory;
@@ -88,9 +97,12 @@ public class RestBuilderMojo extends AbstractMojo {
 
         codeGenerator.generate(jCodeModel, model);
 
-        generatedSourceDirectory.mkdirs();
+        generatedSourceDirectory.getCanonicalFile().mkdirs();
 
-        jCodeModel.build(generatedSourceDirectory);
+        jCodeModel.build(generatedSourceDirectory.getCanonicalFile());
+
+
+        this.project.addCompileSourceRoot( generatedSourceDirectory.getPath() );
 
 //        getLog().info("Found resource in package: " + model.getPackage());
 //        for (RestResource resource : model.getResources()) {

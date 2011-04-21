@@ -20,7 +20,7 @@ public class RestBuilderTest {
                 .isNotNull()
                 .isInstanceOf(RestModel.class);
 
-        assertThat(model.getPackage()).isEqualTo("com.example.rebuilder");
+        assertThat(model.getPackage()).isEqualTo("com.example.rbuilder");
         assertThat(model.getNamespace()).isEqualTo("example");
         assertThat(model.getOperations()).isNotEmpty().hasSize(2);
 
