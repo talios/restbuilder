@@ -172,26 +172,6 @@ public class RestletCodeGenerator implements CodeGenerator {
 
     }
 
-    private JVar generateIdentiferExpression(JCodeModel jCodeModel, JBlock block, JDefinedClass valueClass, Resource resource) {
-
-        List<JVar> vars = Lists.newArrayList();
-        for (Identifier identifier : resource.getIdentifiers()) {
-            JClass type = resolveFieldType(jCodeModel, identifier);
-            vars.add(block.decl(type,
-                    identifier.getAttributeName(),
-                    type.staticInvoke("valueOf").arg(
-                            JExpr.cast(jCodeModel.ref(String.class),
-                                    JExpr.invoke("getRequest").invoke("getAttributes").invoke("get").arg(identifier.getAttributeName().toLowerCase())))));
-        }
-
-        JInvocation identifierExpression = JExpr._new(valueClass);
-        for (JVar var : vars) {
-            identifierExpression.arg(var);
-        }
-        return block.decl(valueClass, "identifer", identifierExpression);
-
-
-    }
 
     private JDefinedClass generateValueClass(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
         String name = camel(resource.getName());

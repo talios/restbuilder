@@ -1,0 +1,34 @@
+body {
+    /*font-family: 'Helvetica';*/
+    font-size: 1em;
+    width: 800px;
+    margin: auto;
+}
+
+table {
+    padding: 0 0 0 0;
+    width: 100%;
+    text-align: left;
+}
+
+tbody {
+    background-color: #94AEDE;
+}
+
+tr {
+    vertical-align: text-top;
+}
+
+td.odd {
+    background-color: #94AEDE;
+}
+
+td.even {
+    background-color: #AEC6E8;
+}
+
+th {
+    white-space: nowrap;
+    font-weight: bold;
+}
+
