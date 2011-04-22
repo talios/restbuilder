@@ -23,11 +23,11 @@ public class RestModel {
         }
     }
 
-    public String getaPackage() {
+    public String getPackage() {
         return aPackage;
     }
 
-    public String getaNamespace() {
+    public String getNamespace() {
         return aNamespace;
     }
 

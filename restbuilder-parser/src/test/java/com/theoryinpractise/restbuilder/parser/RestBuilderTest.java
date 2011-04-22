@@ -13,15 +13,15 @@ public class RestBuilderTest {
 
         RestBuilder restBuilder = new RestBuilder();
 
-        RestModel model = restBuilder.buildModel("/account.rbuilder");
+        RestModel model = restBuilder.buildModel(RestBuilderTest.class.getResource("/account.rbuilder"));
 
         assertThat(model)
                 .describedAs("A restbuilder model object")
                 .isNotNull()
                 .isInstanceOf(RestModel.class);
 
-        assertThat(model.getaPackage()).isEqualTo("com.example.rebuilder");
-        assertThat(model.getaNamespace()).isEqualTo("example");
+        assertThat(model.getPackage()).isEqualTo("com.example.rbuilder");
+        assertThat(model.getNamespace()).isEqualTo("example");
         assertThat(model.getOperations()).isNotEmpty().hasSize(2);
 
 
