@@ -36,12 +36,6 @@
                         </goals>
                     </execution>
                 </executions>
-
-
-                <!--<extensions>true</extensions>-->
-                <!--<configuration>-->
-                <!--<temporaryOutputDirectory>true</temporaryOutputDirectory>-->
-                <!--</configuration>-->
             </plugin>
         </plugins>
     </build>
@@ -54,9 +48,34 @@
         </dependency>
 
         <dependency>
+            <groupId>com.noelios.restlet</groupId>
+            <artifactId>com.noelios.restlet</artifactId>
+            <version>1.1.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.7.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ning</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
