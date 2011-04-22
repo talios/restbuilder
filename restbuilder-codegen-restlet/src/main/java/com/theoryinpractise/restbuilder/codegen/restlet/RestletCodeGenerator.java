@@ -1,6 +1,7 @@
 package com.theoryinpractise.restbuilder.codegen.restlet;
 
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import com.sun.codemodel.*;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.parser.model.RestAttribute;
@@ -75,6 +76,8 @@ public class RestletCodeGenerator implements CodeGenerator {
             jc.javadoc().add("Top level REST resource - " + resource.getName());
 
             JMethod constructor = jc.constructor(JMod.PUBLIC);
+            constructor.annotate(Inject.class);
+
             JVar context = constructor.param(Context.class, "context");
             JVar request = constructor.param(Request.class, "request");
             JVar response = constructor.param(Response.class, "response");
