@@ -45,7 +45,6 @@
 
     </dependencies>
 
-
     <modules>
         <module>restbuilder-parser</module>
         <module>restbuilder-codegen-api</module>

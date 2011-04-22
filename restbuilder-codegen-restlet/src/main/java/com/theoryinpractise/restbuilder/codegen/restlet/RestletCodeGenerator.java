@@ -13,6 +13,7 @@ import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
+import org.restlet.data.Status;
 import org.restlet.resource.Representation;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.StringRepresentation;
@@ -117,16 +118,33 @@ public class RestletCodeGenerator implements CodeGenerator {
             jTryBlock = post.body()._try();
 
             for (RestOperation operation : resource.getOperations()) {
-                JBlock block = makeIfBlockForOperation(jTryBlock, representation, model, operation)._then();
+                JBlock block = makeIfBlockForOperation(jTryBlock.body(), representation, model, operation)._then();
                 JVar operationModel = block.decl(lookupOperationClass(operation), operation.getName(), JExpr._null());
                 JInvocation newRepresentation = makeRepresentation(jCodeModel, mapper, handlerField.invoke("handle" + camel(operation.getName())).arg(operationModel));
-                block.add(JExpr.invoke("getResponse").invoke("setEntity").arg(
-                        newRepresentation));
-
+                setResponseStatus(jCodeModel, block, "SUCCESS_OK", newRepresentation);
             }
-            throwIoAsResource(jCodeModel, jTryBlock);
+
+            JCatchBlock catchBlock = jTryBlock._catch(jCodeModel.ref(IOException.class));
+            setResponseStatus(jCodeModel, catchBlock.body(), "CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE", null);
+
         }
 
+
+    }
+
+    private void setResponseStatus(JCodeModel jCodeModel, JBlock block, String statusEnumName, JInvocation newRepresentation) {
+        block.add(JExpr
+                .invoke("getResponse")
+                .invoke("setStatus")
+                .arg(jCodeModel
+                        .ref(Status.class).staticRef(statusEnumName)));
+
+        if (newRepresentation != null) {
+            block.add(JExpr.invoke("getResponse").invoke("setEntity").arg(
+                    newRepresentation));
+        }
+
+        block._return();
     }
 
     private void throwIoAsResource(JCodeModel jCodeModel, JTryBlock jTryBlock) {
@@ -143,8 +161,8 @@ public class RestletCodeGenerator implements CodeGenerator {
                 .arg(mapper.invoke("writeValueAsString").arg(invoke));
     }
 
-    private JConditional makeIfBlockForOperation(JTryBlock block, JVar representation, RestModel model, RestOperation operation) {
-        return block.body()._if(representation
+    private JConditional makeIfBlockForOperation(JBlock block, JVar representation, RestModel model, RestOperation operation) {
+        return block._if(representation
                 .invoke("getMediaType")
                 .invoke("toString")
                 .invoke("equals").arg(JExpr.lit(buildContentType(model, operation))));
