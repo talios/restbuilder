@@ -22,7 +22,7 @@ operation cancellation {
  */
 resource account {
 
-  key integer id;
+  identifier integer id;
   attribute string displayName;
   attribute datetime fromDate;
   attribute datetime thruDate;

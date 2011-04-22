@@ -29,6 +29,7 @@
                 <groupId>com.theoryinpractise.restbuilder</groupId>
                 <artifactId>restbuilder-maven-plugin</artifactId>
                 <version>@project.version@</version>
+                <!--<version>1.0.1-SNAPSHOT</version>-->
                 <executions>
                     <execution>
                         <goals>

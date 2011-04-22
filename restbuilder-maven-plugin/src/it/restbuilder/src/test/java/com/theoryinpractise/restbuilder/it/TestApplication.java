@@ -32,7 +32,7 @@ public class TestApplication {
         };
 
         server = new ApplicationBuilder(module)
-                .attach("/account", AccountResource.class);
+                .attach(AccountResource.URI, AccountResource.class);
 
         server.startServer(8182);
 
@@ -47,7 +47,7 @@ public class TestApplication {
     @Test
     public void testApplication() throws InterruptedException, ExecutionException, IOException {
 
-        Map account = requestJsonAsMap("http://localhost:8182/account");
+        Map account = requestJsonAsMap("http://localhost:8182/account/43");
         assertThat(account.get("displayName")).isEqualTo("Test Account");
 
     }

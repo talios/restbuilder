@@ -12,6 +12,7 @@ public class RestBuilderTest {
 
 
         RestBuilder restBuilder = new RestBuilder();
+//        restBuilder.setTracingEnabled(true);
 
         Model model = restBuilder.buildModel(RestBuilderTest.class.getResource("/account.rbuilder"));
 

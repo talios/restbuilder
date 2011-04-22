@@ -20,13 +20,13 @@ public class RestBuilderParser extends BaseParser {
                 Sequence(
                         String("package"),
                         Whitespace(),
-                        Identifier(),
+                        CodeIdentifier(),
                         aPackage.set(match()),
                         Ch(';'),
                         Optional(Whitespace()),
                         String("namespace"),
                         Whitespace(),
-                        Identifier(),
+                        CodeIdentifier(),
                         aNamespace.set(match()),
                         Ch(';'),
                         Optional(Whitespace()),
@@ -49,11 +49,11 @@ public class RestBuilderParser extends BaseParser {
                 Optional(Whitespace()),
                 String("resource"),
                 Whitespace(),
-                Identifier(),
+                CodeIdentifier(),
                 resourceName.set(match()),
                 Whitespace(),
                 Ch('{'),
-                ZeroOrMore(FirstOf(Attribute(), Whitespace(), OperationReference(), Operation())),
+                ZeroOrMore(FirstOf(Identifier(), Attribute(), Whitespace(), OperationReference(), Operation())),
 
                 Optional(Whitespace()),
                 Ch('}'),
@@ -67,7 +67,7 @@ public class RestBuilderParser extends BaseParser {
         return Sequence(
                 String("operation"),
                 Whitespace(),
-                Identifier(),
+                CodeIdentifier(),
                 operationName.set(match()),
                 Ch(';'),
                 Optional(Whitespace()),
@@ -106,7 +106,7 @@ public class RestBuilderParser extends BaseParser {
                 Optional(Whitespace()),
                 String("operation"),
                 Whitespace(),
-                Identifier(),
+                CodeIdentifier(),
                 operationName.set(match()),
                 Whitespace(),
                 Ch('{'),
@@ -126,7 +126,7 @@ public class RestBuilderParser extends BaseParser {
     }
 
     Resource makeRestResource(String comment, String resourceName) {
-        List children = popChildValues(Attribute.class, OperationDefinition.class, OperationReference.class);
+        List children = popChildValues(Identifier.class, Attribute.class, OperationDefinition.class, OperationReference.class);
 
         return new Resource(
                 getContext().getLevel(),
@@ -174,6 +174,26 @@ public class RestBuilderParser extends BaseParser {
         return attributes;
     }
 
+    Rule Identifier() {
+        Var<String> comment = new Var<String>();
+        Var<String> attributeName = new Var<String>();
+        Var<String> attributeType = new Var<String>();
+
+        return Sequence(
+                Optional(Javadoc(), comment.set(getContext().getValueStack().pop().toString())),
+                Optional(Whitespace()),
+                String("identifier"),
+                Whitespace(),
+                Type(),
+                attributeType.set(match()),
+                Whitespace(),
+                CodeIdentifier(),
+                attributeName.set(match()),
+                Ch(';'),
+                push(new Identifier(getContext().getLevel(),  comment.get(), attributeType.get(), attributeName.get()))
+        );
+    }
+
     Rule Attribute() {
         Var<String> comment = new Var<String>();
         Var<String> attributeName = new Var<String>();
@@ -187,7 +207,7 @@ public class RestBuilderParser extends BaseParser {
                 Type(),
                 attributeType.set(match()),
                 Whitespace(),
-                Identifier(),
+                CodeIdentifier(),
                 attributeName.set(match()),
                 Ch(';'),
                 push(new Attribute(getContext().getLevel(), comment.get(), attributeType.get(), attributeName.get()))
@@ -211,7 +231,7 @@ public class RestBuilderParser extends BaseParser {
                 push(comment.get()));
     }
 
-    Rule Identifier() {
+    Rule CodeIdentifier() {
         return OneOrMore(FirstOf(Alpha(), Numeric(), AnyOf(".")));
     }
 
