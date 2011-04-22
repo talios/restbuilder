@@ -1,6 +1,6 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.theoryinpractise.restbuilder.parser.model.RestModel;
+import com.theoryinpractise.restbuilder.parser.model.Model;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -13,12 +13,12 @@ public class RestBuilderTest {
 
         RestBuilder restBuilder = new RestBuilder();
 
-        RestModel model = restBuilder.buildModel(RestBuilderTest.class.getResource("/account.rbuilder"));
+        Model model = restBuilder.buildModel(RestBuilderTest.class.getResource("/account.rbuilder"));
 
         assertThat(model)
                 .describedAs("A restbuilder model object")
                 .isNotNull()
-                .isInstanceOf(RestModel.class);
+                .isInstanceOf(Model.class);
 
         assertThat(model.getPackage()).isEqualTo("com.example.rbuilder");
         assertThat(model.getNamespace()).isEqualTo("example");

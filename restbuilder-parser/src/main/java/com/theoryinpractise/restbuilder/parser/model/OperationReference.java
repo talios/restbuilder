@@ -2,11 +2,11 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 import java.util.List;
 
-public class RestOperationReference implements RestOperation {
+public class OperationReference implements Operation {
     private int level;
-    private RestOperationDefinition restOperationDefinition;
+    private OperationDefinition restOperationDefinition;
 
-    public RestOperationReference(int level, RestOperationDefinition restOperationDefinition) {
+    public OperationReference(int level, OperationDefinition restOperationDefinition) {
         this.level = level;
         this.restOperationDefinition = restOperationDefinition;
     }
@@ -15,7 +15,7 @@ public class RestOperationReference implements RestOperation {
         return level;
     }
 
-    public RestOperationDefinition getRestOperationDefinition() {
+    public OperationDefinition getRestOperationDefinition() {
         return restOperationDefinition;
     }
 
@@ -30,7 +30,7 @@ public class RestOperationReference implements RestOperation {
     }
 
     @Override
-    public List<RestAttribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         return restOperationDefinition.getAttributes();
     }
 }

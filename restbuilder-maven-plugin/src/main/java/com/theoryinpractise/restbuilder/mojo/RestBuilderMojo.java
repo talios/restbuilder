@@ -21,7 +21,7 @@ import com.sun.codemodel.JCodeModel;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.codegen.restlet.RestletCodeGenerator;
 import com.theoryinpractise.restbuilder.parser.RestBuilder;
-import com.theoryinpractise.restbuilder.parser.model.RestModel;
+import com.theoryinpractise.restbuilder.parser.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -38,12 +38,12 @@ import java.io.IOException;
 public class RestBuilderMojo extends AbstractMojo {
 
     /**
-       * @parameter expression="${project}"
-       * @required
-       * @readonly
-       * @since 1.0
-       */
-      private MavenProject project;
+     * @parameter expression="${project}"
+     * @required
+     * @readonly
+     * @since 1.0
+     */
+    private MavenProject project;
 
 
     /**
@@ -91,7 +91,7 @@ public class RestBuilderMojo extends AbstractMojo {
     private void processResourceFile(File file) throws IOException, JClassAlreadyExistsException {
 
         RestBuilder restBuilder = new RestBuilder();
-        RestModel model = restBuilder.buildModel(file);
+        Model model = restBuilder.buildModel(file);
         JCodeModel jCodeModel = new JCodeModel();
         CodeGenerator codeGenerator = new RestletCodeGenerator();
 
@@ -102,10 +102,10 @@ public class RestBuilderMojo extends AbstractMojo {
         jCodeModel.build(generatedSourceDirectory.getCanonicalFile());
 
 
-        this.project.addCompileSourceRoot( generatedSourceDirectory.getPath() );
+        this.project.addCompileSourceRoot(generatedSourceDirectory.getPath());
 
 //        getLog().info("Found resource in package: " + model.getPackage());
-//        for (RestResource resource : model.getResources()) {
+//        for (Resource resource : model.getResources()) {
 //            getLog().info(" - " + resource.getName());
 //        }
 

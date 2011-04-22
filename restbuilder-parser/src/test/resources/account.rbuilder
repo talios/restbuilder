@@ -21,7 +21,8 @@ operation cancellation {
  * This is the account resource.
  */
 resource account {
-  attribute integer id;
+
+  key integer id;
   attribute string displayName;
   attribute datetime fromDate;
   attribute datetime thruDate;

@@ -75,12 +75,12 @@ public class RestBuilderParser extends BaseParser {
         );
     }
 
-    RestOperationReference makeOperationReference(String operationName) {
+    OperationReference makeOperationReference(String operationName) {
 
-        RestOperationDefinition restOperationDefinition = null;
+        OperationDefinition restOperationDefinition = null;
         for (Object o : getContext().getValueStack()) {
-            if (o instanceof RestOperationDefinition) {
-                RestOperationDefinition op = (RestOperationDefinition) o;
+            if (o instanceof OperationDefinition) {
+                OperationDefinition op = (OperationDefinition) o;
                 if (op.getName().equals(operationName) && op.getLevel() < getContext().getLevel()) { // TODO why 3?
                     restOperationDefinition = op;
                     break;
@@ -95,7 +95,7 @@ public class RestBuilderParser extends BaseParser {
                     getContext().getInputBuffer().getPosition(getContext().getMatchStartIndex()).line));
         }
 
-        return new RestOperationReference(getContext().getLevel(), restOperationDefinition);
+        return new OperationReference(getContext().getLevel(), restOperationDefinition);
     }
 
     Rule Operation() {
@@ -118,26 +118,26 @@ public class RestBuilderParser extends BaseParser {
         );
     }
 
-    RestModel makeRestModel(String packageName, String namespace) {
+    Model makeRestModel(String packageName, String namespace) {
 
-        List<Object> children = popChildValues(RestOperationDefinition.class, RestResource.class);
+        List<Object> children = popChildValues(OperationDefinition.class, Resource.class);
 
-        return new RestModel(packageName, namespace, children);
+        return new Model(packageName, namespace, children);
     }
 
-    RestResource makeRestResource(String comment, String resourceName) {
-        List children = popChildValues(RestAttribute.class, RestOperationDefinition.class, RestOperationReference.class);
+    Resource makeRestResource(String comment, String resourceName) {
+        List children = popChildValues(Attribute.class, OperationDefinition.class, OperationReference.class);
 
-        return new RestResource(
+        return new Resource(
                 getContext().getLevel(),
                 comment,
                 resourceName,
                 children);
     }
 
-    RestOperationDefinition makeRestOperationDefinition(String comment, String operationName) {
-        List<RestAttribute> attributes = popValuesIntoList(RestAttribute.class);
-        return new RestOperationDefinition(getContext().getLevel(), comment, operationName, attributes);
+    OperationDefinition makeRestOperationDefinition(String comment, String operationName) {
+        List<Attribute> attributes = popValuesIntoList(Attribute.class);
+        return new OperationDefinition(getContext().getLevel(), comment, operationName, attributes);
     }
 
     List<Object> popChildValues(Class... aClass) {
@@ -190,7 +190,7 @@ public class RestBuilderParser extends BaseParser {
                 Identifier(),
                 attributeName.set(match()),
                 Ch(';'),
-                push(new RestAttribute(getContext().getLevel(), comment.get(), attributeType.get(), attributeName.get()))
+                push(new Attribute(getContext().getLevel(), comment.get(), attributeType.get(), attributeName.get()))
         );
     }
 
@@ -203,7 +203,7 @@ public class RestBuilderParser extends BaseParser {
                 Whitespace(),
                 Optional(String("*")),
                 Optional(Whitespace()),
-                OneOrMore(FirstOf(Alpha(),AnyOf("/\'\"\n@,."), Whitespace())),
+                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"\n@,."), Whitespace())),
                 comment.set(match()),
                 Optional(Whitespace()),
                 String("*/"),

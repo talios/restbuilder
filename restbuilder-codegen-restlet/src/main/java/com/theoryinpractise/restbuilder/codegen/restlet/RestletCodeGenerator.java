@@ -4,10 +4,10 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.sun.codemodel.*;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
-import com.theoryinpractise.restbuilder.parser.model.RestAttribute;
-import com.theoryinpractise.restbuilder.parser.model.RestModel;
-import com.theoryinpractise.restbuilder.parser.model.RestOperation;
-import com.theoryinpractise.restbuilder.parser.model.RestResource;
+import com.theoryinpractise.restbuilder.parser.model.Attribute;
+import com.theoryinpractise.restbuilder.parser.model.Model;
+import com.theoryinpractise.restbuilder.parser.model.Operation;
+import com.theoryinpractise.restbuilder.parser.model.Resource;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -40,7 +40,7 @@ public class RestletCodeGenerator implements CodeGenerator {
     public static final String OPERATION = "Operation";
     private Map<String, JDefinedClass> definedClasses = Maps.newHashMap();
 
-    public void generate(JCodeModel jCodeModel, RestModel model) throws JClassAlreadyExistsException {
+    public void generate(JCodeModel jCodeModel, Model model) throws JClassAlreadyExistsException {
 
         JPackage aPackage = jCodeModel._package(model.getPackage());
 
@@ -51,9 +51,9 @@ public class RestletCodeGenerator implements CodeGenerator {
 
     }
 
-    private void generateOperationResourceClasses(JCodeModel jCodeModel, JPackage p, RestModel model) throws JClassAlreadyExistsException {
+    private void generateOperationResourceClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
 
-        for (RestResource resource : model.getResources()) {
+        for (Resource resource : model.getResources()) {
 
             String name = camel(resource.getName());
             String handlerName = camel(resource.getName() + "Handler");
@@ -61,14 +61,14 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             JDefinedClass res = generateImmutableBean(jCodeModel, p, name, resource.getAttributes());
 
-            for (RestOperation restOperation : resource.getOperations()) {
-                generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(restOperation), restOperation.getAttributes());
+            for (Operation operation : resource.getOperations()) {
+                generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
             }
 
 
             JDefinedClass ifn = p.subPackage("handler")._interface(handlerName);
             ifn.method(JMod.NONE, res, "represent");
-            for (RestOperation operation : resource.getOperations()) {
+            for (Operation operation : resource.getOperations()) {
                 ifn.method(JMod.NONE, res, "handle" + camel(operation.getName())).param(JMod.FINAL, lookupOperationClass(operation), operation.getName());
             }
 
@@ -117,7 +117,7 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             jTryBlock = post.body()._try();
 
-            for (RestOperation operation : resource.getOperations()) {
+            for (Operation operation : resource.getOperations()) {
                 JBlock block = makeIfBlockForOperation(jTryBlock.body(), representation, model, operation)._then();
                 JVar operationModel = block.decl(lookupOperationClass(operation), operation.getName(), JExpr._null());
                 JInvocation newRepresentation = makeRepresentation(jCodeModel, mapper, handlerField.invoke("handle" + camel(operation.getName())).arg(operationModel));
@@ -152,7 +152,7 @@ public class RestletCodeGenerator implements CodeGenerator {
         catchBlock.body()._throw(JExpr._new(jCodeModel.ref(ResourceException.class)).arg(catchBlock.param("e")));
     }
 
-    private JDefinedClass lookupOperationClass(RestOperation operation) {
+    private JDefinedClass lookupOperationClass(Operation operation) {
         return definedClasses.get(makeOperationClassName(operation));
     }
 
@@ -161,27 +161,27 @@ public class RestletCodeGenerator implements CodeGenerator {
                 .arg(mapper.invoke("writeValueAsString").arg(invoke));
     }
 
-    private JConditional makeIfBlockForOperation(JBlock block, JVar representation, RestModel model, RestOperation operation) {
+    private JConditional makeIfBlockForOperation(JBlock block, JVar representation, Model model, Operation operation) {
         return block._if(representation
                 .invoke("getMediaType")
                 .invoke("toString")
                 .invoke("equals").arg(JExpr.lit(buildContentType(model, operation))));
     }
 
-    private void generateOperationModelClasses(JCodeModel jCodeModel, JPackage p, RestModel model) throws JClassAlreadyExistsException {
-        for (RestOperation restOperation : model.getOperations()) {
-            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(restOperation), restOperation.getAttributes());
+    private void generateOperationModelClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
+        for (Operation operation : model.getOperations()) {
+            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
         }
     }
 
-    private String makeOperationClassName(RestOperation restOperation) {
-        return camel(restOperation.getName() + OPERATION);
+    private String makeOperationClassName(Operation operation) {
+        return camel(operation.getName() + OPERATION);
     }
 
     private JDefinedClass generateImmutableBean(JCodeModel jCodeModel,
                                                 JPackage p,
                                                 final String className,
-                                                final List<RestAttribute> attributes) throws JClassAlreadyExistsException {
+                                                final List<Attribute> attributes) throws JClassAlreadyExistsException {
 
         if (definedClasses.containsKey(className)) {
             return definedClasses.get(className);
@@ -193,7 +193,7 @@ public class RestletCodeGenerator implements CodeGenerator {
         JMethod constructor = jc.constructor(JMod.PUBLIC);
         constructor.javadoc().add("Create a new instance of the operation class");
         JBlock body = constructor.body();
-        for (RestAttribute attr : attributes) {
+        for (Attribute attr : attributes) {
             JFieldVar field = jc.field(JMod.PRIVATE | JMod.FINAL, resolveAttributeType(jCodeModel, attr), "_" + attr.getAttributeName());
             JVar param = constructor.param(com.sun.codemodel.internal.JMod.FINAL, resolveAttributeType(jCodeModel, attr), attr.getAttributeName());
             constructor.javadoc().addParam(attr.getAttributeName()).add("some comment");
@@ -208,7 +208,7 @@ public class RestletCodeGenerator implements CodeGenerator {
         return jc;
     }
 
-    private JClass resolveAttributeType(JCodeModel jCodeModel, RestAttribute attr) {
+    private JClass resolveAttributeType(JCodeModel jCodeModel, Attribute attr) {
         if ("string".equals(attr.getAttributeType())) {
             return jCodeModel.ref(String.class);
         }

@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
-import com.theoryinpractise.restbuilder.parser.model.RestModel;
+import com.theoryinpractise.restbuilder.parser.model.Model;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ParseRunner;
@@ -31,15 +31,15 @@ public class RestBuilder {
         this.tracingEnabled = tracingEnabled;
     }
 
-    public RestModel buildModel(URL url) throws IOException {
+    public Model buildModel(URL url) throws IOException {
         return buildModel(com.google.common.io.Resources.newReaderSupplier(url, Charsets.UTF_8));
     }
 
-    public RestModel buildModel(File file) throws IOException {
+    public Model buildModel(File file) throws IOException {
         return buildModel(Files.newReaderSupplier(file, Charsets.UTF_8));
     }
 
-    private RestModel buildModel(InputSupplier<InputStreamReader> supplier) throws IOException {
+    private Model buildModel(InputSupplier<InputStreamReader> supplier) throws IOException {
 
         RestBuilderParser parser = Parboiled.createParser(RestBuilderParser.class);
 
@@ -57,7 +57,7 @@ public class RestBuilder {
 
             throw new IllegalArgumentException("model has errors");
         } else {
-            return (RestModel) result.resultValue;
+            return (Model) result.resultValue;
         }
 
     }

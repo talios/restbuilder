@@ -2,13 +2,13 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 import java.util.List;
 
-public class RestOperationDefinition implements RestOperation {
+public class OperationDefinition implements Operation {
     private int level;
     private String comment;
     private String operationName;
-    private List<RestAttribute> attributes;
+    private List<Attribute> attributes;
 
-    public RestOperationDefinition(int level, String comment, String operationName, List<RestAttribute> attributes) {
+    public OperationDefinition(int level, String comment, String operationName, List<Attribute> attributes) {
         this.level = level;
         this.comment = comment;
         this.operationName = operationName;
@@ -27,7 +27,7 @@ public class RestOperationDefinition implements RestOperation {
         return operationName;
     }
 
-    public List<RestAttribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         return attributes;
     }
 }

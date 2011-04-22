@@ -9,9 +9,12 @@ import java.util.List;
  * Time: 10:38 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface RestOperation extends Level {
+public interface Operation extends Level {
     int getLevel();
+
     String getName();
+
     String getComment();
-    List<RestAttribute> getAttributes();
+
+    List<Attribute> getAttributes();
 }

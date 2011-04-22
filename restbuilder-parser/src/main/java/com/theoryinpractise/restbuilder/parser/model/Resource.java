@@ -4,23 +4,23 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class RestResource implements Level {
+public class Resource implements Level {
     private int level;
     private String comment;
     private String resourceName;
-    private List<RestAttribute> attributes = Lists.newArrayList();
-    private List<RestOperation> operations = Lists.newArrayList();
+    private List<Attribute> attributes = Lists.newArrayList();
+    private List<Operation> operations = Lists.newArrayList();
 
-    public RestResource(int level, String comment,  String resourceName, List children) {
+    public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
         this.comment = comment;
         this.resourceName = resourceName;
         for (Object child : children) {
-            if (child instanceof RestAttribute) {
-                attributes.add((RestAttribute) child);
+            if (child instanceof Attribute) {
+                attributes.add((Attribute) child);
             }
-            if (child instanceof RestOperation) {
-                operations.add((RestOperation) child);
+            if (child instanceof Operation) {
+                operations.add((Operation) child);
             }
         }
     }
@@ -37,11 +37,11 @@ public class RestResource implements Level {
         return comment;
     }
 
-    public List<RestAttribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         return attributes;
     }
 
-    public List<RestOperation> getOperations() {
+    public List<Operation> getOperations() {
         return operations;
     }
 }
