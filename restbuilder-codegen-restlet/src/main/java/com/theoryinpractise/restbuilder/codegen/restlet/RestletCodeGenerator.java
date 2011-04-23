@@ -115,6 +115,12 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             JMethod identifierMethod = generateIdentifierGenerationMethod(jCodeModel, resourceClass, identifierClass, resource);
 
+            JMethod generateRepresentationGenerationMethod = generateRepresentationGenerationMethod(jCodeModel, resourceClass, valueClass, resource, mapper);
+
+            JMethod setResponseRepresentationGenerationMethod = setResponseRepresentationGenerationMethod(jCodeModel, resourceClass);
+
+
+
             JMethod represent = resourceClass.method(JMod.PUBLIC, Representation.class, "represent");
             represent.annotate(Override.class);
             represent.param(Variant.class, "variant");
@@ -122,7 +128,11 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             JTryBlock jTryBlock = represent.body()._try();
 
-            jTryBlock.body()._return(makeRepresentation(jCodeModel, mapper, resourceHandlerFields.get(resource.getName()).invoke("represent").arg(JExpr.invoke(identifierMethod))));
+            JInvocation representInvocation = resourceHandlerFields.get(resource.getName()).invoke("represent")
+                    .arg(JExpr.invoke(identifierMethod));
+
+
+            jTryBlock.body()._return(JExpr.invoke(generateRepresentationGenerationMethod).arg(representInvocation));
 
             throwIoAsResource(jCodeModel, jTryBlock);
 
@@ -134,18 +144,27 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             for (Operation operation : resource.getOperations()) {
                 JBlock block = makeIfBlockForOperation(jTryBlock.body(), representation, model, operation)._then();
-                JVar operationModel = block.decl(lookupOperationClass(operation), operation.getName(), JExpr._null());
 
-                JInvocation newRepresentation = makeRepresentation(jCodeModel, mapper,
-                        resourceHandlerFields.get(operation.getName()).invoke("handle" + camel(operation.getName()))
-                                .arg(JExpr.invoke(identifierMethod))
-                                .arg(operationModel));
+                // Parse request content into operation value object
+                // new ObjectMapper().readValue(r.getResponseBody(), Map.class);
+                JVar operationModel = block.decl(
+                        lookupOperationClass(operation),
+                        operation.getName(),
+                        mapper.invoke("readValue").arg("").arg(lookupOperationClass(operation).dotclass()));
 
-                setResponseStatus(jCodeModel, block, "SUCCESS_OK", newRepresentation);
+                JInvocation handleInvocation = resourceHandlerFields.get(operation.getName()).invoke("handle" + camel(operation.getName()))
+                        .arg(JExpr.invoke(identifierMethod))
+                        .arg(operationModel);
+
+                block.invoke(setResponseRepresentationGenerationMethod)
+                        .arg(jCodeModel.ref(Status.class).staticRef("SUCCESS_OK"))
+                        .arg(JExpr.invoke(generateRepresentationGenerationMethod).arg(handleInvocation));
+
             }
 
             JCatchBlock catchBlock = jTryBlock._catch(jCodeModel.ref(IOException.class));
-            setResponseStatus(jCodeModel, catchBlock.body(), "CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE", null);
+            setResponseStatus(catchBlock.body(),  null, jCodeModel.ref(Status.class).staticRef("CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE"));
+            catchBlock.body()._return();
 
         }
 
@@ -154,9 +173,9 @@ public class RestletCodeGenerator implements CodeGenerator {
 
     private JMethod generateIdentifierGenerationMethod(JCodeModel jCodeModel,JDefinedClass resourceClass,  JDefinedClass valueClass, Resource resource) {
 
-        JMethod identifierMethod = resourceClass.method(JMod.PRIVATE, valueClass, "extractIdentifier");
+        JMethod identifierMethod = resourceClass.method(JMod.PRIVATE, valueClass, "generate" + camel(resource.getName()) + "Identifier");
 
-        List<JVar> vars = Lists.newArrayList();
+        List < JVar > vars = Lists.newArrayList();
         for (Identifier identifier : resource.getIdentifiers()) {
             JClass type = resolveFieldType(jCodeModel, identifier);
             vars.add(identifierMethod.body().decl(type,
@@ -175,6 +194,62 @@ public class RestletCodeGenerator implements CodeGenerator {
 
         return identifierMethod;
 
+    }
+
+    private JMethod generateRepresentationGenerationMethod(JCodeModel jCodeModel, JDefinedClass resourceClass, JDefinedClass valueClass, Resource resource, JFieldVar mapper) {
+
+        JMethod method = resourceClass.method(
+                JMod.PRIVATE,
+                jCodeModel.ref(StringRepresentation.class),
+                "generate" + camel(resource.getName()) + "Representation");
+        method._throws(IOException.class);
+
+        JVar value = method.param(JMod.FINAL, valueClass, resource.getName());
+
+        JVar representation = method.body().decl(
+                jCodeModel.ref(StringRepresentation.class),
+                "representation",
+                JExpr._new(jCodeModel.ref(StringRepresentation.class))
+                        .arg(mapper.invoke("writeValueAsString").arg(value)));
+
+
+        method.body()._return(representation);
+
+        return method;
+
+    }
+
+    private JMethod setResponseRepresentationGenerationMethod(JCodeModel jCodeModel, JDefinedClass resourceClass) {
+
+        JMethod method = resourceClass.method(JMod.PRIVATE, jCodeModel.VOID, "setResponseRepresentation");
+        JVar status = method.param(JMod.FINAL, jCodeModel.ref(Status.class), "status");
+        JVar value = method.param(JMod.FINAL, jCodeModel.ref(StringRepresentation.class), "representation");
+
+        setResponseStatus(method.body(), value, status);
+
+        method.body()._return();
+
+        return method;
+
+    }
+
+    private void setResponseStatus(JBlock block, JVar newRepresentation, final JExpression status) {
+        block.add(JExpr
+                .invoke("getResponse")
+                .invoke("setStatus")
+                .arg(status));
+
+        if (newRepresentation != null) {
+            block.add(JExpr.invoke("getResponse").invoke("setEntity").arg(
+                    newRepresentation));
+        }
+
+    }
+
+
+    private JInvocation makeRepresentation(JCodeModel jCodeModel, JFieldVar mapper, final JInvocation invoke) {
+        return JExpr._new(jCodeModel.ref(StringRepresentation.class))
+                .arg(mapper.invoke("writeValueAsString").arg(invoke));
     }
 
 
@@ -219,21 +294,6 @@ public class RestletCodeGenerator implements CodeGenerator {
         return classMap;
     }
 
-    private void setResponseStatus(JCodeModel jCodeModel, JBlock block, String statusEnumName, JInvocation newRepresentation) {
-        block.add(JExpr
-                .invoke("getResponse")
-                .invoke("setStatus")
-                .arg(jCodeModel
-                        .ref(Status.class).staticRef(statusEnumName)));
-
-        if (newRepresentation != null) {
-            block.add(JExpr.invoke("getResponse").invoke("setEntity").arg(
-                    newRepresentation));
-        }
-
-        block._return();
-    }
-
     private void throwIoAsResource(JCodeModel jCodeModel, JTryBlock jTryBlock) {
         JCatchBlock catchBlock = jTryBlock._catch(jCodeModel.ref(IOException.class));
         catchBlock.body()._throw(JExpr._new(jCodeModel.ref(ResourceException.class)).arg(catchBlock.param("e")));
@@ -241,11 +301,6 @@ public class RestletCodeGenerator implements CodeGenerator {
 
     private JDefinedClass lookupOperationClass(Operation operation) {
         return definedClasses.get(makeOperationClassName(operation));
-    }
-
-    private JInvocation makeRepresentation(JCodeModel jCodeModel, JFieldVar mapper, final JInvocation invoke) {
-        return JExpr._new(jCodeModel.ref(StringRepresentation.class))
-                .arg(mapper.invoke("writeValueAsString").arg(invoke));
     }
 
     private JConditional makeIfBlockForOperation(JBlock block, JVar representation, Model model, Operation operation) {
