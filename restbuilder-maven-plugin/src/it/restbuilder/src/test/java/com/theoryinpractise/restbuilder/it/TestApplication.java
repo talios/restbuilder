@@ -1,6 +1,8 @@
 package com.theoryinpractise.restbuilder.it;
 
 import com.example.rbuilder.handler.AccountHandler;
+import com.example.rbuilder.handler.AccountCancellationHandler;
+import com.example.rbuilder.handler.AccountNotifyHandler;
 import com.example.rbuilder.resource.AccountResource;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -28,6 +30,8 @@ public class TestApplication {
         Module module = new Module() {
             public void configure(Binder binder) {
                 binder.bind(AccountHandler.class).to(TestAccountHandler.class);
+                binder.bind(AccountCancellationHandler.class).to(TestAccountCancellationHandler.class);
+                binder.bind(AccountNotifyHandler.class).to(TestAccountNotifyHandler.class);
             }
         };
 

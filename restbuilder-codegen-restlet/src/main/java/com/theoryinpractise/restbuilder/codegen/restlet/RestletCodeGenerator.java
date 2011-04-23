@@ -53,13 +53,12 @@ public class RestletCodeGenerator implements CodeGenerator {
 
         for (Resource resource : model.getResources()) {
 
-            JDefinedClass res = generateValueClass(jCodeModel, p, resource);
+            JDefinedClass valueClass = generateValueClass(jCodeModel, p, resource);
 
             JDefinedClass identifierClass = generateIdentifierClass(jCodeModel, p, resource);
 
             generateOperationClasses(jCodeModel, p, resource);
 
-            JDefinedClass ifn = generateHandlerClass(p, resource, res, identifierClass);
 
             String resourceName = camel(resource.getName() + "Resource");
             JDefinedClass resourceClass = p.subPackage("resource")._class(resourceName);
@@ -72,13 +71,26 @@ public class RestletCodeGenerator implements CodeGenerator {
             JVar context = constructor.param(Context.class, "context");
             JVar request = constructor.param(Request.class, "request");
             JVar response = constructor.param(Response.class, "response");
-            JVar handler = constructor.param(ifn, "Handler");
-            JFieldVar handlerField = resourceClass.field(JMod.PRIVATE | JMod.FINAL, ifn, "_handler");
+
+            constructor.body().invoke("super").arg(context).arg(request).arg(response);
+                        constructor.body().invoke("setVariants")
+                                .arg(jCodeModel.ref(Arrays.class).staticInvoke("asList")
+                                        .arg(JExpr._new(jCodeModel.ref(Variant.class))
+                                                .arg(jCodeModel.ref(MediaType.class).staticRef("APPLICATION_JSON"))));
+
+            Map<String, JDefinedClass> resourceHandlerMap = generateHandlerClasses(p, resource, valueClass, identifierClass);
+            Map<String, JFieldVar> resourceHandlerFields = Maps.newHashMap();
+            for (Map.Entry<String, JDefinedClass> entry : resourceHandlerMap.entrySet()) {
+                JVar handler = constructor.param(entry.getValue(), entry.getKey() + "Handler");
+                JFieldVar handlerField = resourceClass.field(JMod.PRIVATE | JMod.FINAL, entry.getValue(), "_" + entry.getKey() + "Handler");
+                constructor.body().assign(handlerField, handler);
+                resourceHandlerFields.put(entry.getKey(), handlerField);
+            }
+
             JFieldVar mapper = resourceClass.field(
                     JMod.PRIVATE | JMod.FINAL, jCodeModel.ref(ObjectMapper.class),
                     "_mapper",
                     JExpr._new(jCodeModel.ref(ObjectMapper.class)));
-
 
 
             // URI constant
@@ -92,13 +104,6 @@ public class RestletCodeGenerator implements CodeGenerator {
                     "URI", JExpr.lit(sb.toString()));
 
 
-            constructor.body().invoke("super").arg(context).arg(request).arg(response);
-            constructor.body().invoke("setVariants")
-                    .arg(jCodeModel.ref(Arrays.class).staticInvoke("asList")
-                            .arg(JExpr._new(jCodeModel.ref(Variant.class))
-                                    .arg(jCodeModel.ref(MediaType.class).staticRef("APPLICATION_JSON"))));
-
-            constructor.body().assign(handlerField, handler);
 
             JMethod allowGet = resourceClass.method(JMod.PUBLIC, jCodeModel.BOOLEAN, "allowGet");
             allowGet.annotate(Override.class);
@@ -117,7 +122,7 @@ public class RestletCodeGenerator implements CodeGenerator {
 
             JTryBlock jTryBlock = represent.body()._try();
 
-            jTryBlock.body()._return(makeRepresentation(jCodeModel, mapper, handlerField.invoke("represent").arg(JExpr.invoke(identifierMethod))));
+            jTryBlock.body()._return(makeRepresentation(jCodeModel, mapper, resourceHandlerFields.get(resource.getName()).invoke("represent").arg(JExpr.invoke(identifierMethod))));
 
             throwIoAsResource(jCodeModel, jTryBlock);
 
@@ -132,7 +137,7 @@ public class RestletCodeGenerator implements CodeGenerator {
                 JVar operationModel = block.decl(lookupOperationClass(operation), operation.getName(), JExpr._null());
 
                 JInvocation newRepresentation = makeRepresentation(jCodeModel, mapper,
-                        handlerField.invoke("handle" + camel(operation.getName()))
+                        resourceHandlerFields.get(operation.getName()).invoke("handle" + camel(operation.getName()))
                                 .arg(JExpr.invoke(identifierMethod))
                                 .arg(operationModel));
 
@@ -189,16 +194,29 @@ public class RestletCodeGenerator implements CodeGenerator {
         return generateImmutableBean(jCodeModel, p, identifierName, resource.getIdentifiers());
     }
 
-    private JDefinedClass generateHandlerClass(JPackage p, Resource resource, JDefinedClass res, JDefinedClass identifierClass) throws JClassAlreadyExistsException {
+    private Map<String,JDefinedClass> generateHandlerClasses(JPackage p, Resource resource, JDefinedClass res, JDefinedClass identifierClass) throws JClassAlreadyExistsException {
+
+        Map<String,JDefinedClass> classMap = Maps.newHashMap();
+
         String handlerName = camel(resource.getName() + "Handler");
         JDefinedClass ifn = p.subPackage("handler")._interface(handlerName);
         ifn.method(JMod.NONE, res, "represent").param(identifierClass, "identifier");
+
+        classMap.put(resource.getName(), ifn);
+
         for (Operation operation : resource.getOperations()) {
+            String operationHandlerName = camel(resource.getName() + camel(operation.getName()) +  "Handler");
+
+            ifn = p.subPackage("handler")._interface(operationHandlerName);
+
             JMethod operationMethod = ifn.method(JMod.NONE, res, "handle" + camel(operation.getName()));
             operationMethod.param(JMod.FINAL, identifierClass, "identifier");
             operationMethod.param(JMod.FINAL, lookupOperationClass(operation), operation.getName());
+
+            classMap.put(operation.getName(), ifn);
         }
-        return ifn;
+
+        return classMap;
     }
 
     private void setResponseStatus(JCodeModel jCodeModel, JBlock block, String statusEnumName, JInvocation newRepresentation) {
