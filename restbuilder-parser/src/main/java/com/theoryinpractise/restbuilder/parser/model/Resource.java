@@ -9,6 +9,7 @@ import java.util.List;
 public class Resource implements Level {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
     private int level;
+    private String preamble;
     private String comment;
     private String resourceName;
     private List<Identifier> identifiers = Lists.newArrayList();
@@ -17,7 +18,16 @@ public class Resource implements Level {
 
     public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
-        this.comment = comment;
+
+        if (comment != null) {
+            int index = comment.indexOf(".") + 1;
+            this.preamble = comment.substring(0, index).trim();
+            this.comment = comment.substring(index).trim();
+        } else {
+            this.comment = "";
+            this.preamble = "";
+        }
+
         this.resourceName = resourceName;
         for (Object child : children) {
             if (child instanceof Identifier) {
@@ -38,6 +48,10 @@ public class Resource implements Level {
 
     public String getName() {
         return resourceName;
+    }
+
+    public String getPreamble() {
+        return preamble;
     }
 
     public String getComment() {

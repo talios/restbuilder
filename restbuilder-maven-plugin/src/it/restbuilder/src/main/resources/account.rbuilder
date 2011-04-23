@@ -22,7 +22,15 @@ operation cancellation {
  */
 resource account {
   identifier integer id;
+
+  /**
+   * The displayable name of the account.
+   */
   attribute string displayName;
+
+  /**
+   * The date the account was created.
+   */
   attribute datetime fromDate;
   attribute datetime thruDate;
 

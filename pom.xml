@@ -9,6 +9,18 @@
     <url>https://github.com/talios/restbuilder</url>
     <packaging>pom</packaging>
 
+    <build>
+        <plugins>
+            <plugin>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>2.3.2</version>
+               <configuration>
+                   <source>1.6</source>
+                   <target>1.6</target>
+               </configuration>
+           </plugin>
+        </plugins>
+    </build>
     <dependencies>
 
         <dependency>
@@ -49,6 +61,7 @@
         <module>restbuilder-parser</module>
         <module>restbuilder-codegen-api</module>
         <module>restbuilder-codegen-restlet</module>
+        <module>restbuilder-docbuilder</module>
         <module>restbuilder-maven-plugin</module>
   </modules>
 </project>

@@ -85,7 +85,7 @@ public class RestletCodeGenerator implements CodeGenerator {
             StringBuilder sb = new StringBuilder("/" + resource.getName());
             if (!resource.getIdentifiers().isEmpty()) {
                 for (Identifier identifier : resource.getIdentifiers()) {
-                    sb.append("/{").append(identifier.getAttributeName()).append("}");
+                    sb.append("/{").append(identifier.getName()).append("}");
                 }
             }
             resourceClass.field(JMod.PUBLIC | JMod.FINAL | JMod.STATIC, jCodeModel.ref(String.class),
@@ -155,10 +155,10 @@ public class RestletCodeGenerator implements CodeGenerator {
         for (Identifier identifier : resource.getIdentifiers()) {
             JClass type = resolveFieldType(jCodeModel, identifier);
             vars.add(identifierMethod.body().decl(type,
-                    identifier.getAttributeName(),
+                    identifier.getName(),
                     type.staticInvoke("valueOf").arg(
                             JExpr.cast(jCodeModel.ref(String.class),
-                                    JExpr.invoke("getRequest").invoke("getAttributes").invoke("get").arg(identifier.getAttributeName().toLowerCase())))));
+                                    JExpr.invoke("getRequest").invoke("getAttributes").invoke("get").arg(identifier.getName().toLowerCase())))));
         }
 
         JInvocation identifierExpression = JExpr._new(valueClass);
@@ -172,26 +172,6 @@ public class RestletCodeGenerator implements CodeGenerator {
 
     }
 
-    private JVar generateIdentiferExpression(JCodeModel jCodeModel, JBlock block, JDefinedClass valueClass, Resource resource) {
-
-        List<JVar> vars = Lists.newArrayList();
-        for (Identifier identifier : resource.getIdentifiers()) {
-            JClass type = resolveFieldType(jCodeModel, identifier);
-            vars.add(block.decl(type,
-                    identifier.getAttributeName(),
-                    type.staticInvoke("valueOf").arg(
-                            JExpr.cast(jCodeModel.ref(String.class),
-                                    JExpr.invoke("getRequest").invoke("getAttributes").invoke("get").arg(identifier.getAttributeName().toLowerCase())))));
-        }
-
-        JInvocation identifierExpression = JExpr._new(valueClass);
-        for (JVar var : vars) {
-            identifierExpression.arg(var);
-        }
-        return block.decl(valueClass, "identifer", identifierExpression);
-
-
-    }
 
     private JDefinedClass generateValueClass(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
         String name = camel(resource.getName());
@@ -283,14 +263,14 @@ public class RestletCodeGenerator implements CodeGenerator {
         constructor.javadoc().add("Create a new instance of the class");
         JBlock body = constructor.body();
         for (Field attr : fields) {
-            JFieldVar field = jc.field(JMod.PRIVATE | JMod.FINAL, resolveFieldType(jCodeModel, attr), "_" + attr.getAttributeName());
-            JVar param = constructor.param(com.sun.codemodel.internal.JMod.FINAL, resolveFieldType(jCodeModel, attr), attr.getAttributeName());
-            constructor.javadoc().addParam(attr.getAttributeName()).add("some comment");
+            JFieldVar field = jc.field(JMod.PRIVATE | JMod.FINAL, resolveFieldType(jCodeModel, attr), "_" + attr.getName());
+            JVar param = constructor.param(com.sun.codemodel.internal.JMod.FINAL, resolveFieldType(jCodeModel, attr), attr.getName());
+            constructor.javadoc().addParam(attr.getName()).add("some comment");
             body.assign(field, param);
 
-            JMethod getter = jc.method(JMod.PUBLIC, resolveFieldType(jCodeModel, attr), "get" + camel(attr.getAttributeName()));
+            JMethod getter = jc.method(JMod.PUBLIC, resolveFieldType(jCodeModel, attr), "get" + camel(attr.getName()));
             getter.body()._return(field);
-            getter.javadoc().add("Return the content of the " + attr.getAttributeName() + " attribute.");
+            getter.javadoc().add("Return the content of the " + attr.getName() + " attribute.");
         }
 
         definedClasses.put(className, jc);
@@ -298,19 +278,19 @@ public class RestletCodeGenerator implements CodeGenerator {
     }
 
     private JClass resolveFieldType(JCodeModel jCodeModel, Field attr) {
-        if ("string".equals(attr.getAttributeType())) {
+        if ("string".equals(attr.getType())) {
             return jCodeModel.ref(String.class);
         }
-        if ("datetime".equals(attr.getAttributeType())) {
+        if ("datetime".equals(attr.getType())) {
             return jCodeModel.ref(Date.class);
         }
-        if ("integer".equals(attr.getAttributeType())) {
+        if ("integer".equals(attr.getType())) {
             return jCodeModel.ref(Integer.class);
         }
-        if ("double".equals(attr.getAttributeType())) {
+        if ("double".equals(attr.getType())) {
             return jCodeModel.ref(Double.class);
         }
-        throw new IllegalArgumentException("Unsupported attribute type: " + attr.getAttributeType());
+        throw new IllegalArgumentException("Unsupported attribute type: " + attr.getType());
     }
 
 

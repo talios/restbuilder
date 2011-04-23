@@ -30,6 +30,11 @@ public class OperationReference implements Operation {
     }
 
     @Override
+    public String getPreamble() {
+        return restOperationDefinition.getPreamble();
+    }
+
+    @Override
     public List<Attribute> getAttributes() {
         return restOperationDefinition.getAttributes();
     }

@@ -1,0 +1,46 @@
+body, table {
+    font-family: 'Cantarell', arial, serif;
+    font-size: 14px;
+}
+
+table {
+    padding: 0 0 0 0;
+    width: 90%;
+    text-align: justify;
+}
+
+tr {
+    vertical-align: text-top;
+}
+
+td {
+    border-top: 1px solid #EEEEEE;
+}
+
+th {
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+#index {
+    float: left;
+    width: 250px;
+    height: 100%;
+    margin-right: 25px;
+    border-right: 1px solid #AAAAAA;
+    vertical-align: text-top;
+    background-color: #c7d8f0;
+}
+
+#content, #title, #footer {
+    margin-left: 260;
+}
+
+.indexheading {
+    font-weight: bold;
+}
+
+pre.sample {
+    background-color: #EEEEEE;
+    padding: 10px;
+}
