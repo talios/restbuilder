@@ -16,5 +16,7 @@ public interface Operation extends Level {
 
     String getComment();
 
+    String getPreamble();
+
     List<Attribute> getAttributes();
 }

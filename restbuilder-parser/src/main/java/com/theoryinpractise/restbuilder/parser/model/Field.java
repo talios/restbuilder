@@ -32,11 +32,11 @@ public abstract class Field implements Level {
         return comment;
     }
 
-    public String getAttributeType() {
+    public String getType() {
         return attributeType;
     }
 
-    public String getAttributeName() {
+    public String getName() {
         return attributeName;
     }
 

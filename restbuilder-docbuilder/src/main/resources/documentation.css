@@ -1,30 +1,20 @@
-body {
-    /*font-family: 'Helvetica';*/
-    font-size: 1em;
-    width: 800px;
-    margin: auto;
+body, table {
+    font-family: 'Cantarell', arial, serif;
+    font-size: 14px;
 }
 
 table {
     padding: 0 0 0 0;
-    width: 100%;
-    text-align: left;
-}
-
-tbody {
-    background-color: #94AEDE;
+    width: 90%;
+    text-align: justify;
 }
 
 tr {
     vertical-align: text-top;
 }
 
-td.odd {
-    background-color: #94AEDE;
-}
-
-td.even {
-    background-color: #AEC6E8;
+td {
+    border-top: 1px solid #EEEEEE;
 }
 
 th {
@@ -32,3 +22,25 @@ th {
     font-weight: bold;
 }
 
+#index {
+    float: left;
+    width: 250px;
+    height: 100%;
+    margin-right: 25px;
+    border-right: 1px solid #AAAAAA;
+    vertical-align: text-top;
+    background-color: #c7d8f0;
+}
+
+#content, #title, #footer {
+    margin-left: 260;
+}
+
+.indexheading {
+    font-weight: bold;
+}
+
+pre.sample {
+    background-color: #EEEEEE;
+    padding: 10px;
+}
