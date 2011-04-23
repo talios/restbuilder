@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import static com.theoryinpractise.restbuilder.codegen.api.MediaTypeBuilder.buildContentType;
 import static org.apache.commons.lang.StringUtils.capitalize;
@@ -167,7 +168,7 @@ public class RestBuilderDocumentor {
                 ._div()
 
                 .div(id("footer"))
-                .write("(C) 2010 - yadda yadda yadda")
+                .write("Documentation build at " + new Date().toString())
                 ._div()
 
                 ._body()
