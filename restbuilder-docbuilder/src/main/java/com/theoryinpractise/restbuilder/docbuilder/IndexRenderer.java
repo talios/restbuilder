@@ -1,12 +1,18 @@
 package com.theoryinpractise.restbuilder.docbuilder;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.Operation;
+import com.theoryinpractise.restbuilder.parser.model.OperationDefinition;
 import com.theoryinpractise.restbuilder.parser.model.Resource;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.rendersnake.HtmlAttributesFactory.class_;
@@ -34,8 +40,30 @@ public class IndexRenderer implements Renderable {
         }
         c._ul()._li();
 
-        c.li().span(class_("indexheading")).write("Operations")._span().ul();
+
+        List<Operation> operations = Lists.newArrayList();
         for (Operation operation : model.getOperations()) {
+            operations.add(operation);
+        }
+        for (Resource resource : model.getResources()) {
+            for (Operation operation : resource.getOperations()) {
+                if (operation instanceof OperationDefinition) {
+                    operations.add(operation);
+                }
+            }
+        }
+
+        List<Operation> sortedOperations = Ordering.from(new Comparator<Operation>() {
+            @Override
+            public int compare(Operation operation, Operation operation1) {
+                return ComparisonChain.start()
+                        .compare(operation.getName(), operation1.getName())
+                        .result();
+            }
+        }).sortedCopy(operations);
+
+        c.li().span(class_("indexheading")).write("Operations")._span().ul();
+        for (Operation operation : sortedOperations) {
             c.li().a(href(operation.getName() + ".html")).write(capitalize(operation.getName()))._a()._li();
         }
         c._ul()._li();

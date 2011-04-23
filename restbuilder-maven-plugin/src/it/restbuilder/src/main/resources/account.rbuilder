@@ -11,16 +11,38 @@ operation provision {
 }
 
 /**
- * Request the cancellation of a given resource.
+ * Request the cancellation of a given resource.  You must give a reason for the cancellation.
+ *
+ * Giving a reason is highly _important_.
  */
 operation cancellation {
-  attribute datetime thruDate;
+
+  /**
+   * The date when cancellation should occur.
+   */
+  attribute datetime cancellationDate;
+
+  /**
+   * Reason for the cancellation request.
+   */
+  attribute string comment;
 }
 
 /**
  * This is the account resource.
- * An account is a billable entity in the system, think of them as customers, resellers, or someone
+ *
+ * An account is a *billable* entity in the system, think of them as customers, resellers, or someone
  * else we bill.
+ *
+ * Comments are full _markdown_ documents, as such you can also have code blocks:
+ *
+ *     This is a code block.
+ *     This is still a code block.
+ *
+ *  * This however is a bullet point.
+ *
+ * This gives us a good means of writing documentation for resources.
+ *
  */
 resource account {
   identifier integer id;

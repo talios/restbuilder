@@ -266,7 +266,7 @@ public class RestBuilderParser extends BaseParser {
         return Sequence(
                 Whitespace(),
                 String("* "),
-                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,. \t"))),
+                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,.:*_ \t"))),
                 comment.set(match()),
                 Ch('\n'),
                 push(newComment(getContext().getLevel(), elementType, comment.get()))

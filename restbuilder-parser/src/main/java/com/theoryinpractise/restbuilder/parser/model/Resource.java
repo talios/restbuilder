@@ -20,10 +20,16 @@ public class Resource implements Level {
     public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
         this.elementType = ElementType.MODEL;
+
         if (comment != null) {
-            int index = comment.indexOf(".") + 1;
-            this.preamble = comment.substring(0, index).trim();
-            this.comment = comment.substring(index).trim();
+            int index = comment.indexOf("\n\n");
+            if (index != -1) {
+                this.preamble = comment.substring(0, index).trim();
+                this.comment = comment.substring(index).trim();
+            } else {
+                this.preamble = comment;
+                this.comment = "";
+            }
         } else {
             this.comment = "";
             this.preamble = "";

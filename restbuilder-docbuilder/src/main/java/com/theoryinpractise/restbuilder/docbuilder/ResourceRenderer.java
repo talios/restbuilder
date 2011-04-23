@@ -1,9 +1,10 @@
 package com.theoryinpractise.restbuilder.docbuilder;
 
-import com.theoryinpractise.restbuilder.parser.model.Field;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.theoryinpractise.restbuilder.parser.model.*;
+import org.pegdown.PegDownProcessor;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
 
@@ -16,18 +17,20 @@ import static org.rendersnake.HtmlAttributesFactory.href;
 
 public class ResourceRenderer {
 
+    private PegDownProcessor pegdown = new PegDownProcessor();
+
     public Renderable renderResource(final Model model, final Resource resource) {
         return new Renderable() {
             @Override
             public void renderOn(HtmlCanvas c) throws IOException {
 
-                c.p().write(resource.getPreamble())._p();
+                c.div().write(pegdown.markdownToHtml(resource.getPreamble()), false)._div();
 
                 renderResourceContentType(c, model, resource);
                 renderResourceAttributesTable(c, resource);
                 renderResourceOperationsDefinitionList(c, resource);
 
-                c.p().write(resource.getComment())._p();
+                c.div().write(pegdown.markdownToHtml(resource.getComment()), false)._div();
 
                 renderSampleResourceDocument(c, resource);
 
@@ -76,10 +79,17 @@ public class ResourceRenderer {
     private void renderSampleResourceDocument(HtmlCanvas c, Resource resource) throws IOException {
         c.h3().write("Sample document")._h3();
         c.pre(class_("sample")).write("{\n");
-        for (Field field : resource.getFields()) {
-            c.write("  \"" + field.getName() + "\": \"xxx\",\n");
-        }
-        c.write("}\n")._pre();
+
+        String jsonContent = Joiner.on(",\n").join(Iterables.transform(resource.getFields(), new Function<Field, String>() {
+            @Override
+            public String apply(Field field) {
+                return "  \"" + field.getName() + "\": \"xxx\"";
+            }
+        }));
+
+        c.write(jsonContent);
+        c.write("\n}\n")._pre();
+
     }
 
 
