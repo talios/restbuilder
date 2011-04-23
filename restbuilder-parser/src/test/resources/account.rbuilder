@@ -19,6 +19,7 @@ operation cancellation {
 
 /**
  * This is the account resource.
+ * The account resource is a billable user in the system.
  */
 resource account {
 

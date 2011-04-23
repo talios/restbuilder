@@ -1,5 +1,6 @@
 package com.theoryinpractise.restbuilder.parser;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.theoryinpractise.restbuilder.parser.model.*;
@@ -30,7 +31,7 @@ public class RestBuilderParser extends BaseParser {
                         aNamespace.set(match()),
                         Ch(';'),
                         Optional(Whitespace()),
-                        ZeroOrMore(FirstOf(Operation(), Resource())),
+                        ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource())),
 
 
                         Optional(Whitespace()),
@@ -41,11 +42,10 @@ public class RestBuilderParser extends BaseParser {
     }
 
     Rule Resource() {
-        Var<String> comment = new Var<String>();
         Var<String> resourceName = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(), comment.set(getContext().getValueStack().pop().toString())),
+                Optional(Javadoc(ElementType.RESOURCE)),
                 Optional(Whitespace()),
                 String("resource"),
                 Whitespace(),
@@ -53,12 +53,17 @@ public class RestBuilderParser extends BaseParser {
                 resourceName.set(match()),
                 Whitespace(),
                 Ch('{'),
-                ZeroOrMore(FirstOf(Identifier(), Attribute(), Whitespace(), OperationReference(), Operation())),
+                ZeroOrMore(FirstOf(
+                        Whitespace(),
+                        Identifier(ElementType.FIELD),
+                        Attribute(ElementType.FIELD),
+                        OperationReference(),
+                        Operation(ElementType.OPERATION))),
 
                 Optional(Whitespace()),
                 Ch('}'),
                 Optional(Whitespace()),
-                push(makeRestResource(comment.get(), resourceName.get()))
+                push(makeRestResource(resourceName.get()))
         );
     }
 
@@ -81,7 +86,7 @@ public class RestBuilderParser extends BaseParser {
         for (Object o : getContext().getValueStack()) {
             if (o instanceof OperationDefinition) {
                 OperationDefinition op = (OperationDefinition) o;
-                if (op.getName().equals(operationName) && op.getLevel() < getContext().getLevel()) { // TODO why 3?
+                if (op.getName().equals(operationName) && op.getLevel() < getContext().getLevel()) {
                     restOperationDefinition = op;
                     break;
                 }
@@ -95,14 +100,15 @@ public class RestBuilderParser extends BaseParser {
                     getContext().getInputBuffer().getPosition(getContext().getMatchStartIndex()).line));
         }
 
-        return new OperationReference(getContext().getLevel(), restOperationDefinition);
+        return new OperationReference(getContext().getLevel(), ElementType.OPERATION, restOperationDefinition);
     }
 
-    Rule Operation() {
+    Rule Operation(ElementType elementType) {
         Var<String> comment = new Var<String>();
         Var<String> operationName = new Var<String>();
+
         return Sequence(
-                Optional(Javadoc(), comment.set(getContext().getValueStack().pop().toString())),
+                Optional(Javadoc(ElementType.OPERATION), comment.set(popCommentLines(ElementType.OPERATION))),
                 Optional(Whitespace()),
                 String("operation"),
                 Whitespace(),
@@ -110,37 +116,37 @@ public class RestBuilderParser extends BaseParser {
                 operationName.set(match()),
                 Whitespace(),
                 Ch('{'),
-                ZeroOrMore(Attribute()),
+                ZeroOrMore(Attribute(ElementType.OPERATION)),
                 Optional(Whitespace()),
                 Ch('}'),
                 Optional(Whitespace()),
-                push(makeRestOperationDefinition(comment.get(), operationName.get()))
+                push(makeRestOperationDefinition(elementType, operationName.get(), comment.get()))
         );
     }
 
     Model makeRestModel(String packageName, String namespace) {
 
-        List<Object> children = popChildValues(OperationDefinition.class, Resource.class);
+        List<Object> children = popChildValues(ElementType.MODEL, OperationDefinition.class, Resource.class);
 
         return new Model(packageName, namespace, children);
     }
 
-    Resource makeRestResource(String comment, String resourceName) {
-        List children = popChildValues(Identifier.class, Attribute.class, OperationDefinition.class, OperationReference.class);
+    Resource makeRestResource(String resourceName) {
+        List children = popChildValues(ElementType.RESOURCE, Identifier.class, Attribute.class, OperationDefinition.class, OperationReference.class);
 
         return new Resource(
                 getContext().getLevel(),
-                comment,
+                popCommentLines(ElementType.RESOURCE),
                 resourceName,
                 children);
     }
 
-    OperationDefinition makeRestOperationDefinition(String comment, String operationName) {
-        List<Attribute> attributes = popValuesIntoList(Attribute.class);
-        return new OperationDefinition(getContext().getLevel(), comment, operationName, attributes);
+    OperationDefinition makeRestOperationDefinition(ElementType elementType, String operationName, String comment) {
+        List<Attribute> attributes = popValuesIntoList(elementType, Attribute.class);
+        return new OperationDefinition(getContext().getLevel(), elementType, comment, operationName, attributes);
     }
 
-    List<Object> popChildValues(Class... aClass) {
+    List<Object> popChildValues(ElementType parentType, Class... aClass) {
         ImmutableSet<Class> matchingClasses = ImmutableSet.copyOf(aClass);
 
         List values = Lists.newArrayList();
@@ -160,7 +166,8 @@ public class RestBuilderParser extends BaseParser {
         return values;
     }
 
-    private <T> List<T> popValuesIntoList(Class<T> aClass) {
+
+    private <T> List<T> popValuesIntoList(ElementType parentType, Class<T> aClass) {
         List<T> attributes = Lists.newArrayList();
         while (!getContext().getValueStack().isEmpty()) {
             Object o = peek();
@@ -174,13 +181,12 @@ public class RestBuilderParser extends BaseParser {
         return attributes;
     }
 
-    Rule Identifier() {
-        Var<String> comment = new Var<String>();
+    Rule Identifier(ElementType elementType) {
         Var<String> attributeName = new Var<String>();
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(), comment.set(getContext().getValueStack().pop().toString())),
+                Optional(Javadoc(elementType)),
                 Optional(Whitespace()),
                 String("identifier"),
                 Whitespace(),
@@ -190,17 +196,16 @@ public class RestBuilderParser extends BaseParser {
                 CodeIdentifier(),
                 attributeName.set(match()),
                 Ch(';'),
-                push(new Identifier(getContext().getLevel(),  comment.get(), attributeType.get(), attributeName.get()))
+                push(makeIdentifier(elementType, attributeName.get(), attributeType.get()))
         );
     }
 
-    Rule Attribute() {
-        Var<String> comment = new Var<String>();
+    Rule Attribute(ElementType elementType) {
         Var<String> attributeName = new Var<String>();
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(), comment.set(getContext().getValueStack().pop().toString())),
+                Optional(Javadoc(elementType)),
                 Optional(Whitespace()),
                 String("attribute"),
                 Whitespace(),
@@ -210,25 +215,75 @@ public class RestBuilderParser extends BaseParser {
                 CodeIdentifier(),
                 attributeName.set(match()),
                 Ch(';'),
-                push(new Attribute(getContext().getLevel(), comment.get(), attributeType.get(), attributeName.get()))
+                push(makeAttribute(elementType, attributeName.get(), attributeType.get()))
         );
     }
 
-    Rule Javadoc() {
-        Var<String> comment = new Var<String>();
+    Identifier makeIdentifier(ElementType elementType, String name, String type) {
+        String comment = popCommentLines(elementType);
+        return new Identifier(getContext().getLevel(), elementType, comment, name, type);
+    }
+
+    Attribute makeAttribute(ElementType elementType, String name, String type) {
+        String comment = popCommentLines(elementType);
+        return  new Attribute(getContext().getLevel(), elementType, comment, name, type);
+    }
+
+    Class getClassForElementType(ElementType elementType) {
+        Class docClass = null;
+        switch (elementType) {
+            case OPERATION:
+                docClass = Comment.OperationComment.class;
+                break;
+            case RESOURCE:
+                docClass = Comment.ResourceComment.class;
+                break;
+            case FIELD:
+                docClass = Comment.FieldComment.class;
+                break;
+        }
+        return docClass;
+    }
+
+    String popCommentLines(ElementType elementType) {
+        List<Comment> commentLines = Lists.reverse(popValuesIntoList(ElementType.OPERATION, getClassForElementType(elementType)));
+        return Joiner.on("\n").join(commentLines);
+    }
+
+
+    Rule Javadoc(ElementType elementType) {
 
         return Sequence(
                 Optional(Whitespace()),
-                String("/**"),
+                String("/**\n"),
+                OneOrMore(CommentLine(elementType)),
+                Sequence(Whitespace(), String("*/\n")));
+    }
+
+    Rule CommentLine(ElementType elementType) {
+        Var<String> comment = new Var<String>();
+
+        return Sequence(
                 Whitespace(),
-                Optional(String("*")),
-                Optional(Whitespace()),
-                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"\n@,."), Whitespace())),
+                String("* "),
+                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,. \t"))),
                 comment.set(match()),
-                Optional(Whitespace()),
-                String("*/"),
-                Whitespace(),
-                push(comment.get()));
+                Ch('\n'),
+                push(newComment(getContext().getLevel(), elementType, comment.get()))
+
+        );
+    }
+
+    Comment newComment(int level, ElementType elementType, String comment) {
+
+        switch (elementType) {
+            case RESOURCE: return new Comment.ResourceComment(level, elementType, comment);
+            case FIELD: return new Comment.FieldComment(level, elementType, comment);
+            case OPERATION: return new Comment.OperationComment(level, elementType, comment);
+        }
+
+        throw new IllegalArgumentException("Unsupport elementType - " + elementType.name());
+
     }
 
     Rule CodeIdentifier() {
