@@ -256,7 +256,7 @@ public class RestBuilderParser extends BaseParser {
         return Sequence(
                 Optional(Whitespace()),
                 String("/**\n"),
-                OneOrMore(CommentLine(elementType)),
+                OneOrMore(FirstOf(EmptyCommentLine(elementType), CommentLine(elementType))),
                 Sequence(Whitespace(), String("*/\n")));
     }
 
@@ -270,6 +270,16 @@ public class RestBuilderParser extends BaseParser {
                 comment.set(match()),
                 Ch('\n'),
                 push(newComment(getContext().getLevel(), elementType, comment.get()))
+
+        );
+    }
+
+    Rule EmptyCommentLine(ElementType elementType) {
+
+        return Sequence(
+                Whitespace(),
+                String("*\n"),
+                push(newComment(getContext().getLevel(), elementType, ""))
 
         );
     }
