@@ -9,6 +9,7 @@ import java.util.List;
 public class Resource implements Level {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
     private int level;
+    private ElementType elementType;
     private String preamble;
     private String comment;
     private String resourceName;
@@ -18,7 +19,7 @@ public class Resource implements Level {
 
     public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
-
+        this.elementType = ElementType.MODEL;
         if (comment != null) {
             int index = comment.indexOf(".") + 1;
             this.preamble = comment.substring(0, index).trim();
@@ -44,6 +45,10 @@ public class Resource implements Level {
 
     public int getLevel() {
         return level;
+    }
+
+    public ElementType getElementType() {
+        return elementType;
     }
 
     public String getName() {

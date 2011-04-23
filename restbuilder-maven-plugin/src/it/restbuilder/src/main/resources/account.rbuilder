@@ -19,6 +19,8 @@ operation cancellation {
 
 /**
  * This is the account resource.
+ * An account is a billable entity in the system, think of them as customers, resellers, or someone
+ * else we bill.
  */
 resource account {
   identifier integer id;
