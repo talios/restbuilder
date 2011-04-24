@@ -130,10 +130,11 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
             // Parse request content into operation value object
             // new ObjectMapper().readValue(r.getResponseBody(), Map.class);
+
             JVar operationModel = block.decl(
                     lookupOperationClass(operation),
                     operation.getName(),
-                    mapper.invoke("readValue").arg("").arg(lookupOperationClass(operation).dotclass()));
+                    mapper.invoke("readValue").arg(request.invoke("getEntity").invoke("getText")).arg(lookupOperationClass(operation).dotclass()));
 
             JInvocation handleInvocation = resourceHandlerFields.get(operation.getName()).invoke("handle" + camel(operation.getName()))
                     .arg(JExpr.invoke(identifierMethod))
