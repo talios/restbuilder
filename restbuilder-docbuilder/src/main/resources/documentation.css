@@ -1,25 +1,26 @@
 body, table {
-    font-family: 'Cantarell', georgia, arial, serif;
-    font-size: 13px;
+    font-family: verdana, arial, serif;
+    font-size: 12px;
 }
 
-table {
-    padding: 0 0 0 0;
-    width: 90%;
-    text-align: justify;
+h2 {
+    border-bottom: 1px solid #AAAAAA;
 }
 
-tr {
-    vertical-align: text-top;
+table.details {
+    width: 800px;
+    margin-top: 25px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 td {
-    border-top: 1px solid #EEEEEE;
+    vertical-align: text-top;
 }
 
-th {
-    white-space: nowrap;
+td.heading {
     font-weight: bold;
+    width: 150px;
 }
 
 #index {
@@ -29,18 +30,22 @@ th {
     margin-right: 25px;
     border-right: 1px solid #AAAAAA;
     vertical-align: text-top;
-    background-color: #c7d8f0;
+    background-color: #eeeeff;
 }
 
 #content, #title, #footer {
     margin-left: 260;
 }
 
+#footer {
+    margin-top: 25px;
+}
+
 .indexheading {
     font-weight: bold;
 }
 
-pre.sample {
+pre.code {
     background-color: #EEEEEE;
-    padding: 10px;
+    padding: 5px;
 }

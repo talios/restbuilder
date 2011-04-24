@@ -9,7 +9,7 @@ import java.util.List;
  * Time: 10:38 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface Operation extends Level {
+public interface Operation extends Level, FieldHolder {
     int getLevel();
 
     String getName();

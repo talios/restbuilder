@@ -3,10 +3,7 @@ package com.theoryinpractise.restbuilder.docbuilder;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
-import com.theoryinpractise.restbuilder.parser.model.OperationDefinition;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import com.theoryinpractise.restbuilder.parser.model.*;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
 

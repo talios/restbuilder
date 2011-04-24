@@ -53,6 +53,11 @@ public class OperationDefinition implements Operation {
         return operationName;
     }
 
+    @Override
+    public List<? extends Field> getFields() {
+        return attributes;
+    }
+
     public List<Attribute> getAttributes() {
         return attributes;
     }

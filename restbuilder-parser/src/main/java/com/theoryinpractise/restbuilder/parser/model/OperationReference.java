@@ -41,6 +41,11 @@ public class OperationReference implements Operation {
     }
 
     @Override
+    public List<? extends Field> getFields() {
+        return restOperationDefinition.getFields();
+    }
+
+    @Override
     public List<Attribute> getAttributes() {
         return restOperationDefinition.getAttributes();
     }

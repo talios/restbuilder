@@ -1,21 +1,18 @@
 package com.theoryinpractise.restbuilder.docbuilder;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-import com.theoryinpractise.restbuilder.parser.model.Attribute;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
+import com.google.common.collect.Lists;
+import com.theoryinpractise.restbuilder.parser.model.*;
 import org.pegdown.PegDownProcessor;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
 
 import java.io.IOException;
+import java.util.List;
 
 import static com.theoryinpractise.restbuilder.codegen.api.MediaTypeBuilder.buildContentType;
-import static org.rendersnake.HtmlAttributesFactory.class_;
+import static org.rendersnake.HtmlAttributesFactory.href;
 
-public class OperationRenderer {
+public class OperationRenderer extends AbstractRenderer {
 
     private PegDownProcessor pegdown = new PegDownProcessor();
 
@@ -26,59 +23,62 @@ public class OperationRenderer {
 
                 c.div().write(pegdown.markdownToHtml(operation.getPreamble()), false)._div();
 
-                renderOperationContentType(c, model, operation);
-                renderResourceAttributesTable(c, operation);
+                renderAttributesTable(c,
+                        "Content-Type", buildContentType(model, operation),
+                        "Attributes", renderAttributes(operation),
+                        "Resources", renderResources(operation, model),
+                        "Sample Document", renderSampleResourceDocument(operation)
+                );
 
-                c.p()._p();
+                c.h2().write("Overview")._h2();
                 c.div().write(pegdown.markdownToHtml(operation.getComment()), false)._div();
-
-                renderOperationSampleDocument(c, operation);
 
             }
         };
     }
 
-    private void renderResourceAttributesTable(HtmlCanvas c, Operation operation) throws IOException {
-        c.h3().write("Attributes")._h3();
-        // attributes
-        c.table().thead();
-        c.th().write("Name")._th();
-        c.th().write("Type")._th();
-        c.th().write("Description")._th();
-        c._thead();
-        c.tbody();
 
-        boolean oddRow = false;
-        for (Attribute attribute : operation.getAttributes()) {
-            c.tr();
-            c.td(class_(oddRow ? "odd" : "even")).write(attribute.getName())._td();
-            c.td(class_(oddRow ? "odd" : "even")).write(attribute.getType())._td();
-            c.td(class_(oddRow ? "odd" : "even")).write(attribute.getComment())._td();
-            c._tr();
-            oddRow = !oddRow;
-        }
-        c._tbody();
-        c._table();
-    }
-
-    private void renderOperationSampleDocument(HtmlCanvas c, Operation operation) throws IOException {
-        c.h3().write("Sample document")._h3();
-        c.pre().write("{\n");
-
-        String jsonContent = Joiner.on(",\n").join(Iterables.transform(operation.getAttributes(), new Function<Attribute, String>() {
+    private Renderable renderAttributes(final Operation operation) {
+        return new Renderable() {
             @Override
-            public String apply(Attribute attribute) {
-                return "  \"" + attribute.getName() + "\": \"xxx\"";
+            public void renderOn(HtmlCanvas c) throws IOException {
+                for (Field field : operation.getAttributes()) {
+                    c.span().write(field.getName())._span().br();
+                }
             }
-        }));
-
-        c.write(jsonContent);
-        c.write("\n}\n")._pre();
+        };
     }
 
-    private void renderOperationContentType(HtmlCanvas c, Model model, Operation operation) throws IOException {
-        c.h3().write("Content-Type")._h3();
-        c.write(buildContentType(model, operation));
+    private Renderable renderResources(final Operation operation, final Model model) {
+        return new Renderable() {
+            @Override
+            public void renderOn(HtmlCanvas c) throws IOException {
+
+                List<Resource> resources = Lists.newArrayList();
+                for (Resource resource : model.getResources()) {
+                    for (Operation op : resource.getOperations()) {
+                        if (op instanceof OperationDefinition) {
+                            if (op.equals(operation)) {
+                                resources.add(resource);
+                            }
+                        }
+                        if (op instanceof OperationReference) {
+                            if (((OperationReference) op).getRestOperationDefinition().equals(operation))
+                                resources.add(resource);
+                        }
+                    }
+                }
+
+                if (!resources.isEmpty()) {
+                    for (Resource resource : resources) {
+                        c.a(href(resource.getName() + ".html")).write(resource.getName())._a().br();
+                    }
+                } else {
+                    c.em().write("Not used.")._em();
+                }
+            }
+        };
     }
+
 
 }
