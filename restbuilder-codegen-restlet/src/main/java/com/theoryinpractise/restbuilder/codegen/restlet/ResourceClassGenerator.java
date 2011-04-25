@@ -31,6 +31,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
     private JClass formRef;
     private JClass stringRef;
     private String resourceUriPath;
+    private JFieldVar valueMediaType;
 
     public ResourceClassGenerator(JCodeModel codeModel, Model model) {
         this.codeModel = codeModel;
@@ -44,6 +45,15 @@ public class ResourceClassGenerator extends AbstractGenerator {
         JDefinedClass resourceClass = p.subPackage("resource")._class(resourceName);
         resourceClass._extends(org.restlet.resource.Resource.class);
         resourceClass.javadoc().add("Top level REST resource - " + resource.getName());
+
+
+        // org.restlet.data.MediaType.register()
+        valueMediaType = resourceClass.field(JMod.PUBLIC | JMod.STATIC | JMod.FINAL, codeModel.ref(MediaType.class), resource.getName().toUpperCase() + "_MEDIA_TYPE");
+        valueMediaType
+                .init(codeModel.ref(MediaType.class).staticInvoke("register")
+                .arg(MediaTypeBuilder.buildContentType(model, resource))
+                .arg(camel(resource.getName()) + " Media Type"));
+
 
         JMethod constructor = resourceClass.constructor(JMod.PUBLIC);
         constructor.annotate(Inject.class);
@@ -134,7 +144,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
             JVar operationModel = block.decl(
                     lookupOperationClass(operation),
                     operation.getName(),
-                    mapper.invoke("readValue").arg(request.invoke("getEntity").invoke("getText")).arg(lookupOperationClass(operation).dotclass()));
+                    mapper.invoke("readValue").arg(JExpr.invoke("getRequest").invoke("getEntity").invoke("getText")).arg(lookupOperationClass(operation).dotclass()));
 
             JInvocation handleInvocation = resourceHandlerFields.get(operation.getName()).invoke("handle" + camel(operation.getName()))
                     .arg(JExpr.invoke(identifierMethod))
@@ -228,7 +238,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
                 codeModel.ref(StringRepresentation.class),
                 "representation",
                 JExpr._new(codeModel.ref(StringRepresentation.class))
-                        .arg(mapper.invoke("writeValueAsString").arg(value)));
+                        .arg(mapper.invoke("writeValueAsString").arg(value)).arg(valueMediaType));
 
         for (Operation operation : resource.getOperations().values()) {
 
