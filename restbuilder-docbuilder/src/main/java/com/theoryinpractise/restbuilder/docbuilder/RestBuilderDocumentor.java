@@ -28,14 +28,14 @@ public class RestBuilderDocumentor {
         OperationRenderer operationRenderer = new OperationRenderer();
         ResourceRenderer resourceRenderer = new ResourceRenderer();
 
-        for (Operation operation : model.getOperations()) {
+        for (Operation operation : model.getOperations().values()) {
             renderOperation(outputBase, model, operationRenderer, operation);
         }
 
-        for (Resource resource : model.getResources()) {
+        for (Resource resource : model.getResources().values()) {
             renderResource(outputBase, model, resourceRenderer, resource);
 
-            for (Operation operation : resource.getOperations()) {
+            for (Operation operation : resource.getOperations().values()) {
                 if (operation instanceof OperationDefinition) {
                     renderOperation(outputBase, model, operationRenderer, operation);
                 }

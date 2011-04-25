@@ -32,18 +32,18 @@ public class IndexRenderer implements Renderable {
         c.ul();
 
         c.li().span(class_("indexheading")).write("Resources")._span().ul();
-        for (Resource resource : model.getResources()) {
+        for (Resource resource : model.getResources().values()) {
             c.li().a(href(resource.getName() + ".html")).write(capitalize(resource.getName()))._a()._li();
         }
         c._ul()._li();
 
 
         List<Operation> operations = Lists.newArrayList();
-        for (Operation operation : model.getOperations()) {
+        for (Operation operation : model.getOperations().values()) {
             operations.add(operation);
         }
-        for (Resource resource : model.getResources()) {
-            for (Operation operation : resource.getOperations()) {
+        for (Resource resource : model.getResources().values()) {
+            for (Operation operation : resource.getOperations().values()) {
                 if (operation instanceof OperationDefinition) {
                     operations.add(operation);
                 }

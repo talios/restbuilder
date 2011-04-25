@@ -1,9 +1,6 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.theoryinpractise.restbuilder.parser.model.Attribute;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import com.theoryinpractise.restbuilder.parser.model.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -19,7 +16,7 @@ public class RestBuilderTest {
     @BeforeMethod
     public void init() throws IOException {
         RestBuilder restBuilder = new RestBuilder();
-        restBuilder.setTracingEnabled(true);
+//        restBuilder.setTracingEnabled(true);
 
          model = restBuilder.buildModel(RestBuilderTest.class.getResource("/account.rbuilder"));
 
@@ -39,7 +36,7 @@ public class RestBuilderTest {
         assertThat(model.getOperations()).isNotEmpty().hasSize(2);
 
 
-        Resource accountResource = model.getResources().iterator().next();
+        Resource accountResource = model.getResources().get("account");
         assertThat(accountResource.getPreamble()).isNotEmpty();
         assertThat(accountResource.getComment()).isNotEmpty();
 
@@ -48,10 +45,10 @@ public class RestBuilderTest {
 
 
     @Test
-    public void testModelContainsSlashedComments() {
+    public void testModelAttributeContainsSlashedComments() {
 
-        for (Operation operation : model.getOperations()) {
-            if ("cancellation".equals(operation.getName())) {
+        Operation operation = model.getOperations().get("cancellation");
+            if (operation != null) {
 
                 assertThat(operation.getPreamble()).contains("Request the cancellation of a given resource.");
 
@@ -63,9 +60,27 @@ public class RestBuilderTest {
 
                 return;
             }
-        }
+
 
         fail("No operation found for cancellation");
+    }
+
+    @Test
+    public void testModelIdentifierContainsSlashedComments() {
+
+        Resource resource = model.getResources().get("account");
+            if (resource != null) {
+
+                Identifier id = resource.getIdentifiers().iterator().next();
+
+                assertThat(id.getName()).isEqualTo("id");
+                assertThat(id.getComment()).isEqualTo("The key field");
+
+                return;
+            }
+
+
+        fail("No resoruce found for account");
     }
 
 }

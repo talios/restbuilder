@@ -1,24 +1,27 @@
 package com.theoryinpractise.restbuilder.parser.model;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import java.util.List;
+import java.util.Map;
 
 public class Model {
     private String aPackage;
     private String aNamespace;
-    private List<Operation> operations = Lists.newArrayList();
-    private List<Resource> resources = Lists.newArrayList();
+    private Map<String, Operation> operations = Maps.newHashMap();
+    private Map<String, Resource> resources = Maps.newHashMap();
 
     public Model(String aPackage, String aNamespace, List<Object> children) {
         this.aPackage = aPackage;
         this.aNamespace = aNamespace;
         for (Object child : children) {
             if (child instanceof Operation) {
-                operations.add((Operation) child);
+                Operation operation = (Operation) child;
+                operations.put(operation.getName(), operation);
             }
             if (child instanceof Resource) {
-                resources.add((Resource) child);
+                Resource resource = (Resource) child;
+                resources.put(resource.getName(), resource);
             }
         }
     }
@@ -31,11 +34,11 @@ public class Model {
         return aNamespace;
     }
 
-    public List<Operation> getOperations() {
+    public Map<String, Operation> getOperations() {
         return operations;
     }
 
-    public List<Resource> getResources() {
+    public Map<String, Resource> getResources() {
         return resources;
     }
 }

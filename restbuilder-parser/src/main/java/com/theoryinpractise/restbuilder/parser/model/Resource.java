@@ -2,9 +2,11 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
 import java.util.List;
+import java.util.Map;
 
 public class Resource implements Level {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
@@ -15,7 +17,7 @@ public class Resource implements Level {
     private String resourceName;
     private List<Identifier> identifiers = Lists.newArrayList();
     private List<Attribute> attributes = Lists.newArrayList();
-    private List<Operation> operations = Lists.newArrayList();
+    private Map<String,Operation> operations = Maps.newHashMap();
 
     public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
@@ -44,7 +46,8 @@ public class Resource implements Level {
                 attributes.add((Attribute) child);
             }
             if (child instanceof Operation) {
-                operations.add((Operation) child);
+                Operation operation = (Operation) child;
+                operations.put(operation.getName(), operation);
             }
         }
     }
@@ -85,7 +88,7 @@ public class Resource implements Level {
                         .build());
     }
 
-    public List<Operation> getOperations() {
+    public Map<String, Operation> getOperations() {
         return operations;
     }
 

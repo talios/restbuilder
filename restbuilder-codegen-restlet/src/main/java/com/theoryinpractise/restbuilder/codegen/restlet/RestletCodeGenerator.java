@@ -32,7 +32,7 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
 
         ResourceClassGenerator resourceClassGenerator = new ResourceClassGenerator(jCodeModel, model);
 
-        for (Resource resource : model.getResources()) {
+        for (Resource resource : model.getResources().values()) {
 
             JDefinedClass valueClass = generateValueClass(jCodeModel, p, resource);
             JDefinedClass identifierClass = generateIdentifierClass(jCodeModel, p, resource);
@@ -50,7 +50,7 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
     }
 
     private void generateOperationClasses(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
-        for (Operation operation : resource.getOperations()) {
+        for (Operation operation : resource.getOperations().values()) {
             generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
         }
     }
@@ -63,7 +63,7 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
 
 
     private void generateModelClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
-        for (Operation operation : model.getOperations()) {
+        for (Operation operation : model.getOperations().values()) {
             generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
         }
     }

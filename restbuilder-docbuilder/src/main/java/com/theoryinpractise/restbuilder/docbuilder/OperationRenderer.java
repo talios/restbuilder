@@ -55,7 +55,7 @@ public class OperationRenderer extends AbstractRenderer {
             public void renderOn(HtmlCanvas c) throws IOException {
 
                 List<Resource> resources = Lists.newArrayList();
-                for (Resource resource : model.getResources()) {
+                for (Resource resource : model.getResources().values()) {
                     for (Operation op : resource.getOperations()) {
                         if (op instanceof OperationDefinition) {
                             if (op.equals(operation)) {

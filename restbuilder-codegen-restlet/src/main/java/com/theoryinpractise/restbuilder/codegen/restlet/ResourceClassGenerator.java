@@ -125,7 +125,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
         jTryBlock = post.body()._try();
 
-        for (Operation operation : resource.getOperations()) {
+        for (Operation operation : resource.getOperations().values()) {
             JBlock block = makeIfBlockForOperation(jTryBlock.body(), representation, model, operation)._then();
 
             // Parse request content into operation value object
@@ -230,7 +230,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
                 JExpr._new(codeModel.ref(StringRepresentation.class))
                         .arg(mapper.invoke("writeValueAsString").arg(value)));
 
-        for (Operation operation : resource.getOperations()) {
+        for (Operation operation : resource.getOperations().values()) {
 
             String operationLink = String.format("<%s>; rel=\"%s\"; title=\"%s\"; type=\"%s\"; method=\"%s\"",
                     resourceUriPath, operation.getName(), camel(operation.getName()), MediaTypeBuilder.buildContentType(model, operation), "POST");
@@ -284,7 +284,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
         classMap.put(resource.getName(), ifn);
 
-        for (Operation operation : resource.getOperations()) {
+        for (Operation operation : resource.getOperations().values()) {
             String operationHandlerName = camel(resource.getName() + camel(operation.getName()) + "Handler");
 
             ifn = p.subPackage("handler")._interface(operationHandlerName);

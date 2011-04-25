@@ -56,7 +56,7 @@ public class ResourceRenderer extends AbstractRenderer {
         return new Renderable() {
             @Override
             public void renderOn(HtmlCanvas c) throws IOException {
-                for (Operation operation : resource.getOperations()) {
+                for (Operation operation : resource.getOperations().values()) {
                     String name = operation.getName();
                     String title = pegdown.markdownToHtml(operation.getComment());
                     c.a(href(name + ".html").title(title)).write(name)._a().br();

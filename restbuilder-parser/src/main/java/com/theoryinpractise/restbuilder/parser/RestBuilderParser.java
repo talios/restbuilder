@@ -196,6 +196,9 @@ public class RestBuilderParser extends BaseParser {
                 CodeIdentifier(),
                 attributeName.set(match()),
                 Ch(';'),
+                Optional(Whitespace()),
+                Optional(SlashCommentLine(elementType)),
+
                 push(makeIdentifier(elementType, attributeName.get(), attributeType.get()))
         );
     }
