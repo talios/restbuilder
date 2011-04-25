@@ -56,7 +56,7 @@ public class OperationRenderer extends AbstractRenderer {
 
                 List<Resource> resources = Lists.newArrayList();
                 for (Resource resource : model.getResources().values()) {
-                    for (Operation op : resource.getOperations()) {
+                    for (Operation op : resource.getOperations().values()) {
                         if (op instanceof OperationDefinition) {
                             if (op.equals(operation)) {
                                 resources.add(resource);
