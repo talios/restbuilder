@@ -19,6 +19,7 @@ package com.theoryinpractise.restbuilder.mojo;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
+import com.theoryinpractise.restbuilder.codegen.httpserver.HttpHandlerGenerator;
 import com.theoryinpractise.restbuilder.codegen.restlet.RestletCodeGenerator;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -49,12 +50,14 @@ public class CodeGenerationMojo extends AbstractRestBuilderMojo {
             project.addCompileSourceRoot(generatedSourceDirectory.getPath());
 
             final JCodeModel jCodeModel = new JCodeModel();
-            final CodeGenerator codeGenerator = new RestletCodeGenerator();
+            final CodeGenerator restletCodeGenerator = new RestletCodeGenerator();
+            final CodeGenerator httpServerCodeGenerator = new HttpHandlerGenerator();
 
             processResourceFilesInDirectory(resourceDir, new ModelProcessor() {
                 public void process(Model model) throws MojoExecutionException {
                     try {
-                        codeGenerator.generate(jCodeModel, model);
+                        restletCodeGenerator.generate(jCodeModel, model);
+                        httpServerCodeGenerator.generate(jCodeModel, model);
                     } catch (JClassAlreadyExistsException e) {
                         throw new MojoExecutionException(e.getMessage());
                     }

@@ -32,12 +32,14 @@ public class ResourceClassGenerator extends AbstractGenerator {
     private JClass stringRef;
     private String resourceUriPath;
     private JFieldVar valueMediaType;
+    private JClass stringRepresentationRef;
 
     public ResourceClassGenerator(JCodeModel codeModel, Model model) {
         this.codeModel = codeModel;
         this.model = model;
         this.formRef = codeModel.ref(Form.class);
         this.stringRef = codeModel.ref(String.class);
+        this.stringRepresentationRef = codeModel.ref(StringRepresentation.class);
     }
 
     public void generateResourceClass(JPackage p, Model model, Resource resource, JDefinedClass valueClass, JDefinedClass identifierClass) throws JClassAlreadyExistsException {
@@ -156,8 +158,15 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
         }
 
+        setResponseStatus(jTryBlock.body(), null, codeModel.ref(Status.class).staticRef("CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE"));
+
         JCatchBlock catchBlock = jTryBlock._catch(codeModel.ref(IOException.class));
-        setResponseStatus(catchBlock.body(), null, codeModel.ref(Status.class).staticRef("CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE"));
+        JVar exceptionRef = catchBlock.param("e");
+        setResponseStatus(
+                catchBlock.body(),
+                JExpr._new(stringRepresentationRef).arg(exceptionRef.invoke("getMessage")),
+                codeModel.ref(Status.class).staticRef("SERVER_ERROR_INTERNAL"));
+
         catchBlock.body()._return();
     }
 
@@ -228,16 +237,16 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
         JMethod method = resourceClass.method(
                 JMod.PRIVATE,
-                codeModel.ref(StringRepresentation.class),
+                stringRepresentationRef,
                 "generate" + camel(resource.getName()) + "Representation");
         method._throws(IOException.class);
 
         JVar value = method.param(JMod.FINAL, valueClass, resource.getName());
 
         JVar representation = method.body().decl(
-                codeModel.ref(StringRepresentation.class),
+                stringRepresentationRef,
                 "representation",
-                JExpr._new(codeModel.ref(StringRepresentation.class))
+                JExpr._new(stringRepresentationRef)
                         .arg(mapper.invoke("writeValueAsString").arg(value)).arg(valueMediaType));
 
         for (Operation operation : resource.getOperations().values()) {
@@ -260,7 +269,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
         JMethod method = resourceClass.method(JMod.PRIVATE, codeModel.VOID, "setResponseRepresentation");
         JVar status = method.param(JMod.FINAL, codeModel.ref(Status.class), "status");
-        JVar value = method.param(JMod.FINAL, codeModel.ref(StringRepresentation.class), "representation");
+        JVar value = method.param(JMod.FINAL, stringRepresentationRef, "representation");
 
         setResponseStatus(method.body(), value, status);
 
@@ -270,7 +279,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
     }
 
-    private void setResponseStatus(JBlock block, JVar newRepresentation, final JExpression status) {
+    private void setResponseStatus(JBlock block, JExpression newRepresentation, final JExpression status) {
         block.add(JExpr
                 .invoke("getResponse")
                 .invoke("setStatus")
@@ -311,7 +320,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
 
 
     private JInvocation makeRepresentation(JFieldVar mapper, final JInvocation invoke) {
-        return JExpr._new(codeModel.ref(StringRepresentation.class))
+        return JExpr._new(stringRepresentationRef)
                 .arg(mapper.invoke("writeValueAsString").arg(invoke));
     }
 
