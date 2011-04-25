@@ -45,7 +45,7 @@ public class RestBuilderParser extends BaseParser {
         Var<String> resourceName = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(ElementType.RESOURCE)),
+                Optional(CommentBlock(ElementType.RESOURCE)),
                 Optional(Whitespace()),
                 String("resource"),
                 Whitespace(),
@@ -108,7 +108,7 @@ public class RestBuilderParser extends BaseParser {
         Var<String> operationName = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(ElementType.OPERATION), comment.set(popCommentLines(ElementType.OPERATION))),
+                Optional(CommentBlock(ElementType.OPERATION), comment.set(popCommentLines(ElementType.OPERATION))),
                 Optional(Whitespace()),
                 String("operation"),
                 Whitespace(),
@@ -186,7 +186,7 @@ public class RestBuilderParser extends BaseParser {
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(elementType)),
+                Optional(CommentBlock(elementType)),
                 Optional(Whitespace()),
                 String("identifier"),
                 Whitespace(),
@@ -205,7 +205,7 @@ public class RestBuilderParser extends BaseParser {
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(Javadoc(elementType)),
+                Optional(CommentBlock(elementType)),
                 Optional(Whitespace()),
                 String("attribute"),
                 Whitespace(),
@@ -215,6 +215,8 @@ public class RestBuilderParser extends BaseParser {
                 CodeIdentifier(),
                 attributeName.set(match()),
                 Ch(';'),
+                Optional(Whitespace()),
+                Optional(SlashCommentLine(elementType)),
                 push(makeAttribute(elementType, attributeName.get(), attributeType.get()))
         );
     }
@@ -251,22 +253,28 @@ public class RestBuilderParser extends BaseParser {
     }
 
 
-    Rule Javadoc(ElementType elementType) {
+    Rule CommentBlock(ElementType elementType) {
+        return OneOrMore(FirstOf(
+                MultilineAsteriskCommentBlock(elementType),
+                MultilineSlashCommentBlock(elementType)));
+    }
+
+    Rule MultilineAsteriskCommentBlock(ElementType elementType) {
 
         return Sequence(
                 Optional(Whitespace()),
                 String("/**\n"),
-                OneOrMore(FirstOf(EmptyCommentLine(elementType), CommentLine(elementType))),
+                OneOrMore(FirstOf(EmptyAsteriskCommentLine(elementType), AsteriskCommentLine(elementType))),
                 Sequence(Whitespace(), String("*/\n")));
     }
 
-    Rule CommentLine(ElementType elementType) {
+    Rule AsteriskCommentLine(ElementType elementType) {
         Var<String> comment = new Var<String>();
 
         return Sequence(
                 Whitespace(),
                 String("* "),
-                OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,.:*_ \t"))),
+                CommentContent(),
                 comment.set(match()),
                 Ch('\n'),
                 push(newComment(getContext().getLevel(), elementType, comment.get()))
@@ -274,7 +282,7 @@ public class RestBuilderParser extends BaseParser {
         );
     }
 
-    Rule EmptyCommentLine(ElementType elementType) {
+    Rule EmptyAsteriskCommentLine(ElementType elementType) {
 
         return Sequence(
                 Whitespace(),
@@ -282,6 +290,41 @@ public class RestBuilderParser extends BaseParser {
                 push(newComment(getContext().getLevel(), elementType, ""))
 
         );
+    }
+
+    Rule MultilineSlashCommentBlock(ElementType elementType) {
+
+        return Sequence(
+                Optional(Whitespace()),
+                OneOrMore(FirstOf(EmptySlashCommentLine(elementType), SlashCommentLine(elementType))));
+    }
+
+    Rule SlashCommentLine(ElementType elementType) {
+        Var<String> comment = new Var<String>();
+
+        return Sequence(
+                Optional(Whitespace()),
+                String("// "),
+                CommentContent(),
+                comment.set(match()),
+                Ch('\n'),
+                push(newComment(getContext().getLevel(), elementType, comment.get()))
+
+        );
+    }
+
+    Rule EmptySlashCommentLine(ElementType elementType) {
+
+        return Sequence(
+                Whitespace(),
+                String("//\n"),
+                push(newComment(getContext().getLevel(), elementType, ""))
+
+        );
+    }
+
+    Rule CommentContent() {
+        return OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,.:*_ \t")));
     }
 
     Comment newComment(int level, ElementType elementType, String comment) {

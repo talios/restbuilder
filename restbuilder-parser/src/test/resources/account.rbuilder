@@ -10,11 +10,9 @@ operation provision {
   attribute datetime fromDate;
 }
 
-/**
- * Request the cancellation of a given resource.
- */
+// Request the cancellation of a given resource.
 operation cancellation {
-  attribute datetime thruDate;
+  attribute datetime thruDate; // The requested cancellation date.
 }
 
 /**
