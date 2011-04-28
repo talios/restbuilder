@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.sun.codemodel.*;
 import com.theoryinpractise.restbuilder.codegen.api.MediaTypeBuilder;
+import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
 import com.theoryinpractise.restbuilder.parser.model.Identifier;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.Operation;

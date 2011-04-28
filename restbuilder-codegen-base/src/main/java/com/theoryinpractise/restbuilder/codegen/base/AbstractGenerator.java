@@ -1,4 +1,4 @@
-package com.theoryinpractise.restbuilder.codegen.restlet;
+package com.theoryinpractise.restbuilder.codegen.base;
 
 import com.google.common.collect.Maps;
 import com.sun.codemodel.*;
@@ -9,20 +9,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by IntelliJ IDEA.
- * User: amrk
- * Date: 24/04/11
- * Time: 9:56 PM
- * To change this template use File | Settings | File Templates.
- */
 public class AbstractGenerator {
 
     public static final String OPERATION = "Operation";
 
     private static Map<String, JDefinedClass> definedClasses = Maps.newHashMap();
 
-    protected String makeOperationClassName(Operation operation) {
+    public static String makeOperationClassName(Operation operation) {
         return camel(operation.getName() + OPERATION);
     }
 

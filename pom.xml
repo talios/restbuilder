@@ -60,6 +60,8 @@
     <modules>
         <module>restbuilder-parser</module>
         <module>restbuilder-codegen-api</module>
+        <module>restbuilder-codegen-base</module>
+        <module>restbuilder-codegen-httpserver</module>
         <module>restbuilder-codegen-restlet</module>
         <module>restbuilder-docbuilder</module>
         <module>restbuilder-maven-plugin</module>

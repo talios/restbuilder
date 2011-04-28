@@ -3,10 +3,10 @@ package com.theoryinpractise.restbuilder.codegen.restlet;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JPackage;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
+import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
+import com.theoryinpractise.restbuilder.codegen.base.ModelGenerator;
 import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
 import com.theoryinpractise.restbuilder.parser.model.Resource;
 
 
@@ -19,56 +19,31 @@ import com.theoryinpractise.restbuilder.parser.model.Resource;
  */
 public class RestletCodeGenerator extends AbstractGenerator implements CodeGenerator {
 
+    private ModelGenerator modelGenerator = new ModelGenerator();
 
     public void generate(JCodeModel jCodeModel, Model model) throws JClassAlreadyExistsException {
 
-        JPackage aPackage = jCodeModel._package(model.getPackage());
-        generateModelClasses(jCodeModel, aPackage, model);
-        generateResourceClasses(jCodeModel, aPackage, model);
+        ModelGenerator.CodeGenModelMirror mirror = modelGenerator.mirrorOf(jCodeModel, model);
+
+        modelGenerator.generateModelClasses(jCodeModel, mirror.getPackage(), model);
+
+        generateResourceClasses(jCodeModel, mirror);
 
     }
 
-    private void generateResourceClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
+    private void generateResourceClasses(JCodeModel jCodeModel, ModelGenerator.CodeGenModelMirror mirror) throws JClassAlreadyExistsException {
 
-        ResourceClassGenerator resourceClassGenerator = new ResourceClassGenerator(jCodeModel, model);
+        ResourceClassGenerator resourceClassGenerator = new ResourceClassGenerator(jCodeModel, mirror.getModel());
 
-        for (Resource resource : model.getResources().values()) {
+        for (Resource resource : mirror.getModel().getResources().values()) {
 
-            JDefinedClass valueClass = generateValueClass(jCodeModel, p, resource);
-            JDefinedClass identifierClass = generateIdentifierClass(jCodeModel, p, resource);
-            generateOperationClasses(jCodeModel, p, resource);
+            JDefinedClass valueClass = mirror.getResources().get(resource.getName());
+            JDefinedClass identifierClass = mirror.getResourceIdentifiers().get(resource.getName());
 
-            resourceClassGenerator.generateResourceClass(p, model, resource, valueClass, identifierClass);
+            resourceClassGenerator.generateResourceClass(mirror.getPackage(), mirror.getModel(), resource, valueClass, identifierClass);
 
         }
 
     }
-
-    private JDefinedClass generateValueClass(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
-        String name = camel(resource.getName());
-        return generateImmutableBean(jCodeModel, p, name, resource.getFields());
-    }
-
-    private void generateOperationClasses(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
-        for (Operation operation : resource.getOperations().values()) {
-            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
-        }
-    }
-
-    private JDefinedClass generateIdentifierClass(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
-        String identifierName = camel(resource.getName() + "Identifier");
-        return generateImmutableBean(jCodeModel, p, identifierName, resource.getIdentifiers());
-    }
-
-
-
-    private void generateModelClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
-        for (Operation operation : model.getOperations().values()) {
-            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
-        }
-    }
-
-
-
 
 }

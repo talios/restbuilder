@@ -1,4 +1,4 @@
-package com.theoryinpractise.restbuilder.codegen.httpserver;
+package com.theoryinpractise.restbuilder.httpserver;
 
 import com.sun.codemodel.*;
 import com.sun.net.httpserver.HttpExchange;
@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.codegen.api.MediaTypeBuilder;
-import com.theoryinpractise.restbuilder.codegen.restlet.AbstractGenerator;
+import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
 import com.theoryinpractise.restbuilder.parser.model.Identifier;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.Operation;
