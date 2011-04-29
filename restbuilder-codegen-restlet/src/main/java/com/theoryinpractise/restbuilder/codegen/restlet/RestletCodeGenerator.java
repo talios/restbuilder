@@ -1,13 +1,13 @@
 package com.theoryinpractise.restbuilder.codegen.restlet;
 
-import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JDefinedClass;
+import com.google.common.base.Function;
+import com.sun.codemodel.*;
 import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
 import com.theoryinpractise.restbuilder.codegen.base.ModelGenerator;
 import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import org.restlet.Finder;
+import org.restlet.Router;
 
 
 /**
@@ -25,22 +25,42 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
 
         ModelGenerator.CodeGenModelMirror mirror = modelGenerator.mirrorOf(jCodeModel, model);
 
-        modelGenerator.generateModelClasses(jCodeModel, mirror.getPackage(), model);
+//        modelGenerator.generateModelClasses(jCodeModel, mirror.getPackage(), model);
 
         generateResourceClasses(jCodeModel, mirror);
 
+
     }
 
-    private void generateResourceClasses(JCodeModel jCodeModel, ModelGenerator.CodeGenModelMirror mirror) throws JClassAlreadyExistsException {
+    private void generateResourceClasses(JCodeModel codeModel, ModelGenerator.CodeGenModelMirror mirror) throws JClassAlreadyExistsException {
 
-        ResourceClassGenerator resourceClassGenerator = new ResourceClassGenerator(jCodeModel, mirror.getModel());
+        JDefinedClass routerClass = mirror.getPackage()._class(camel(mirror.getModel().getNamespace()) + "RouteManager");
 
-        for (Resource resource : mirror.getModel().getResources().values()) {
+        JMethod attachMethod = routerClass.method(
+                JMod.PUBLIC | JMod.STATIC, codeModel.VOID,
+                "attach" + camel(mirror.getModel().getNamespace()) + "Model");
+        JVar router = attachMethod.param(JMod.FINAL, codeModel.ref(Router.class), "router");
 
-            JDefinedClass valueClass = mirror.getResources().get(resource.getName());
-            JDefinedClass identifierClass = mirror.getResourceIdentifiers().get(resource.getName());
+        JVar finderFunction = attachMethod.param(
+                JMod.FINAL,
+                codeModel.ref(Function.class).narrow(
+                        codeModel.ref(Class.class).narrow(codeModel.ref(org.restlet.resource.Resource.class).wildcard()),
+                        codeModel.ref(Finder.class)
+                ), "finder");
 
-            resourceClassGenerator.generateResourceClass(mirror.getPackage(), mirror.getModel(), resource, valueClass, identifierClass);
+
+        ResourceClassGenerator resourceClassGenerator = new ResourceClassGenerator(codeModel, mirror.getModel());
+
+        for (ModelGenerator.ResourceMirror resourceMirror : mirror.getResources().values()) {
+
+
+            JDefinedClass resourceClass = resourceClassGenerator.generateResourceClass(mirror.getPackage(), mirror.getModel(), resourceMirror);
+
+            // router.attach(path, new GuiceFinder(resourceClass));
+
+            attachMethod.body().add(router.invoke("attach")
+                    .arg(resourceMirror.getUriRef())
+                    .arg(finderFunction.invoke("apply").arg(resourceClass.dotclass())));
 
         }
 

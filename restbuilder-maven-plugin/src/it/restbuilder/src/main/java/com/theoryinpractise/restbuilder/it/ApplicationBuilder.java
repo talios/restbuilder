@@ -20,6 +20,10 @@ public class ApplicationBuilder {
         this.module = module;
     }
 
+    public Router getRouter() {
+        return router;
+    }
+
     public ApplicationBuilder attach(String path, Class<? extends Resource> resourceClass) {
         router.attach(path, new GuiceFinder(resourceClass));
         return this;

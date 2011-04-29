@@ -23,6 +23,10 @@ public class AbstractGenerator {
         return definedClasses.get(makeOperationClassName(operation));
     }
 
+    protected void defineClass(String name, JDefinedClass aClass) {
+        definedClasses.put(name, aClass);
+    }
+
     protected static String camel(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
