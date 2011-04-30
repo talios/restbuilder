@@ -48,9 +48,9 @@ public class AbstractGenerator {
     }
 
     protected JDefinedClass generateImmutableBean(JCodeModel jCodeModel,
-                                                JPackage p,
-                                                final String className,
-                                                final List<? extends Field> fields) throws JClassAlreadyExistsException {
+                                                  JPackage p,
+                                                  final String className,
+                                                  final List<? extends Field>... fields) throws JClassAlreadyExistsException {
 
         if (definedClasses.containsKey(className)) {
             return definedClasses.get(className);
@@ -62,15 +62,17 @@ public class AbstractGenerator {
         JMethod constructor = jc.constructor(JMod.PUBLIC);
         constructor.javadoc().add("Create a new instance of the class");
         JBlock body = constructor.body();
-        for (Field attr : fields) {
-            JFieldVar field = jc.field(JMod.PRIVATE | JMod.FINAL, resolveFieldType(jCodeModel, attr), "_" + attr.getName());
-            JVar param = constructor.param(com.sun.codemodel.internal.JMod.FINAL, resolveFieldType(jCodeModel, attr), attr.getName());
-            constructor.javadoc().addParam(attr.getName()).add("some comment");
-            body.assign(field, param);
+        for (List<? extends Field> fieldList : fields) {
+            for (Field attr : fieldList) {
+                JFieldVar field = jc.field(JMod.PRIVATE | JMod.FINAL, resolveFieldType(jCodeModel, attr), "_" + attr.getName());
+                JVar param = constructor.param(com.sun.codemodel.internal.JMod.FINAL, resolveFieldType(jCodeModel, attr), attr.getName());
+                constructor.javadoc().addParam(attr.getName()).add("some comment");
+                body.assign(field, param);
 
-            JMethod getter = jc.method(JMod.PUBLIC, resolveFieldType(jCodeModel, attr), "get" + camel(attr.getName()));
-            getter.body()._return(field);
-            getter.javadoc().add("Return the content of the " + attr.getName() + " attribute.");
+                JMethod getter = jc.method(JMod.PUBLIC, resolveFieldType(jCodeModel, attr), "get" + camel(attr.getName()));
+                getter.body()._return(field);
+                getter.javadoc().add("Return the content of the " + attr.getName() + " attribute.");
+            }
         }
 
         definedClasses.put(className, jc);

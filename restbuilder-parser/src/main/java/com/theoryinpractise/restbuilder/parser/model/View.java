@@ -2,10 +2,11 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.theoryinpractise.restbuilder.parser.MediaTypeElement;
 
 import java.util.List;
 
-public class View implements Level {
+public class View implements Level, MediaTypeElement {
 
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
 
@@ -14,9 +15,10 @@ public class View implements Level {
     private String preamble;
     private String comment;
     private String resourceName;
-    private List<ResourceAttribute> attributes = Lists.newArrayList();
+    private String viewName;
+    private List<ViewAttribute> attributes = Lists.newArrayList();
 
-    public View(int level, String comment, String resourceName, List children) {
+    public View(int level, String comment, String resourceName, String viewName, List children) {
         this.level = level;
         this.elementType = ElementType.MODEL;
 
@@ -35,9 +37,10 @@ public class View implements Level {
         }
 
         this.resourceName = resourceName;
+        this.viewName = viewName;
         for (Object child : children) {
-            if (child instanceof ResourceAttribute) {
-                attributes.add((ResourceAttribute) child);
+            if (child instanceof ViewAttribute) {
+                attributes.add((ViewAttribute) child);
             }
         }
     }
@@ -51,9 +54,19 @@ public class View implements Level {
         return elementType;
     }
 
-    public String getName() {
+    public String getResourceName() {
         return resourceName;
     }
+
+    public String getName() {
+        return viewName;
+    }
+
+    @Override
+    public String getMediaTypeName() {
+        return getName() + getResourceName().substring(0, 1).toUpperCase() + getResourceName().substring(1);
+    }
+
 
     public String getPreamble() {
         return preamble;
@@ -64,7 +77,7 @@ public class View implements Level {
     }
 
 
-    public List<ResourceAttribute> getAttributes() {
+    public List<ViewAttribute> getAttributes() {
         return FIELD_ORDERING.sortedCopy(attributes);
     }
 

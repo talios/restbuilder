@@ -2,10 +2,7 @@ package com.theoryinpractise.restbuilder.codegen.base;
 
 import com.google.common.collect.Maps;
 import com.sun.codemodel.*;
-import com.theoryinpractise.restbuilder.parser.model.Identifier;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import com.theoryinpractise.restbuilder.parser.model.*;
 
 import java.util.Map;
 
@@ -34,21 +31,20 @@ public class ModelGenerator extends AbstractGenerator {
         JFieldVar uriField = valueClass.field(JMod.PUBLIC | JMod.FINAL | JMod.STATIC, jCodeModel.ref(String.class),
                 "URI", JExpr.lit(sb.toString()));
 
-        return new ResourceMirror(resource, valueClass, identifierClass, uriField);
-    }
 
-    public void generateOperationClasses(JCodeModel jCodeModel, JPackage p, Resource resource) throws JClassAlreadyExistsException {
-        for (Operation operation : resource.getOperations().values()) {
-            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
+        // View classes
+        Map<String,ViewMirror> viewMirrors = Maps.newHashMap();
+        for (Map.Entry<String, View> entry : resource.getViews().entrySet()) {
+
+            JDefinedClass viewClass = generateImmutableBean(jCodeModel, p, camel(entry.getKey()) + name + "View",
+                    resource.getIdentifiers(),
+                    entry.getValue().getAttributes());
+
+            viewMirrors.put(entry.getKey(), new ViewMirror(entry.getValue(), viewClass));
+
         }
-    }
 
-
-
-    public void generateModelClasses(JCodeModel jCodeModel, JPackage p, Model model) throws JClassAlreadyExistsException {
-        for (Operation operation : model.getOperations().values()) {
-            generateImmutableBean(jCodeModel, p.subPackage("operation"), makeOperationClassName(operation), operation.getAttributes());
-        }
+        return new ResourceMirror(resource, valueClass, identifierClass, uriField, viewMirrors);
     }
 
     public CodeGenModelMirror mirrorOf(JCodeModel codeModel, Model model) throws JClassAlreadyExistsException {
@@ -123,13 +119,17 @@ public class ModelGenerator extends AbstractGenerator {
         public Resource resource;
         public JDefinedClass valueClass;
         public JDefinedClass identifierClass;
+        public Map<String, ViewMirror> viewClasses = Maps.newHashMap();
+
+
         private JFieldVar uriVar;
 
-        public ResourceMirror(Resource resource, JDefinedClass valueClass, JDefinedClass identifierClass, JFieldVar uriVar) {
+        public ResourceMirror(Resource resource, JDefinedClass valueClass, JDefinedClass identifierClass, JFieldVar uriVar, Map<String, ViewMirror> viewClasses) {
             this.resource = resource;
             this.valueClass = valueClass;
             this.identifierClass = identifierClass;
             this.uriVar = uriVar;
+            this.viewClasses = viewClasses;
         }
 
         public String getName() {
@@ -138,6 +138,21 @@ public class ModelGenerator extends AbstractGenerator {
 
         public JFieldRef getUriRef() {
             return valueClass.staticRef(uriVar);
+        }
+
+    }
+
+    public class ViewMirror {
+        public View view;
+        public JDefinedClass viewClass;
+
+        public ViewMirror(View view, JDefinedClass viewClass) {
+            this.view = view;
+            this.viewClass = viewClass;
+        }
+
+        public String getName() {
+            return view.getName();
         }
 
     }

@@ -3,6 +3,7 @@ package com.theoryinpractise.restbuilder.it;
 import com.example.rbuilder.ExampleRouteManager;
 import com.example.rbuilder.handler.AccountCancellationHandler;
 import com.example.rbuilder.handler.AccountHandler;
+import com.example.rbuilder.handler.SimpleAccountHandler;
 import com.example.rbuilder.handler.AccountNotifyHandler;
 import com.google.common.base.Function;
 import com.google.inject.Binder;
@@ -37,6 +38,7 @@ public class TestApplication {
         final Module module = new Module() {
             public void configure(Binder binder) {
                 binder.bind(AccountHandler.class).to(TestAccountHandler.class);
+                binder.bind(SimpleAccountHandler.class).to(TestSimpleAccountHandler.class);
                 binder.bind(AccountCancellationHandler.class).to(TestAccountCancellationHandler.class);
                 binder.bind(AccountNotifyHandler.class).to(TestAccountNotifyHandler.class);
             }

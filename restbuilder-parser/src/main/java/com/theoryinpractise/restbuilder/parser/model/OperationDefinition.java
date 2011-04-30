@@ -54,6 +54,11 @@ public class OperationDefinition implements Operation {
     }
 
     @Override
+    public String getMediaTypeName() {
+        return getName();
+    }
+
+    @Override
     public List<? extends Field> getFields() {
         return attributes;
     }
