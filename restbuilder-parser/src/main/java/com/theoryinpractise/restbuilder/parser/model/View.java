@@ -2,11 +2,11 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.theoryinpractise.restbuilder.parser.MediaTypeElement;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 
 import java.util.List;
 
-public class View implements Level, MediaTypeElement {
+public class View implements Level, BaseClassElement {
 
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
 
@@ -81,5 +81,8 @@ public class View implements Level, MediaTypeElement {
         return FIELD_ORDERING.sortedCopy(attributes);
     }
 
-
+    @Override
+    public List<? extends Field> getFields() {
+        return FIELD_ORDERING.sortedCopy(attributes);
+    }
 }

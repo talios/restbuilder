@@ -7,7 +7,7 @@ import com.theoryinpractise.restbuilder.codegen.api.CodeGenerator;
 import com.theoryinpractise.restbuilder.codegen.api.MediaTypeBuilder;
 import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
 import com.theoryinpractise.restbuilder.codegen.base.ModelGenerator;
-import com.theoryinpractise.restbuilder.parser.MediaTypeElement;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.Operation;
 import org.restlet.Finder;
@@ -104,12 +104,12 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
             this.model = model;
         }
 
-        public JFieldRef getMediaType(MediaTypeElement element) {
+        public JFieldRef getMediaType(BaseClassElement element) {
             return routerClass.staticRef(mediaTypeVars.get(buildContentType(model, element)));
         }
     }
 
-    private JFieldVar defineMediaTypeVar(JCodeModel codeModel, Model model, JDefinedClass resourceClass, MediaTypeElement element) {
+    private JFieldVar defineMediaTypeVar(JCodeModel codeModel, Model model, JDefinedClass resourceClass, BaseClassElement element) {
         JFieldVar mediaType = resourceClass.field(
                 JMod.PUBLIC | JMod.STATIC | JMod.FINAL,
                 codeModel.ref(MediaType.class),

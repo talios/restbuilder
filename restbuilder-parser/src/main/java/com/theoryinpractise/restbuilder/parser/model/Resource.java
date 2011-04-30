@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.theoryinpractise.restbuilder.parser.MediaTypeElement;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 
 import java.util.List;
 import java.util.Map;
 
-public class Resource implements Level, MediaTypeElement {
+public class Resource implements Level, BaseClassElement {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
     private int level;
     private ElementType elementType;

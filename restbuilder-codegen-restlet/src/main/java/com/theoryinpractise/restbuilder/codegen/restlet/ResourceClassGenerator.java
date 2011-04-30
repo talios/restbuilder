@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import com.sun.codemodel.*;
 import com.theoryinpractise.restbuilder.codegen.base.AbstractGenerator;
 import com.theoryinpractise.restbuilder.codegen.base.ModelGenerator;
-import com.theoryinpractise.restbuilder.parser.MediaTypeElement;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 import com.theoryinpractise.restbuilder.parser.model.Identifier;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.Operation;
@@ -378,7 +378,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
         catchBlock.body()._throw(JExpr._new(jCodeModel.ref(ResourceException.class)).arg(catchBlock.param("e")));
     }
 
-    private JConditional makeIfBlockForMediaTypeElement(JBlock block, JVar representation, MediaTypeElement element) {
+    private JConditional makeIfBlockForMediaTypeElement(JBlock block, JVar representation, BaseClassElement element) {
         return block._if(resolveRepresentationMediaType(representation)
                 .invoke("equals").arg(mediaTypes.getMediaType(element)));
     }

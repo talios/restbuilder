@@ -25,9 +25,8 @@ public class OperationRenderer extends AbstractRenderer {
 
                 renderAttributesTable(c,
                         "Content-Type", buildContentType(model, operation),
-                        "Attributes", renderAttributes(operation),
-                        "Resources", renderResources(operation, model),
-                        "Sample Document", renderSampleResourceDocument(operation)
+                        "Sample Document", renderSampleResourceDocument(operation),
+                        "Resources", renderResources(operation, model)
                 );
 
                 c.h2().write("Overview")._h2();
