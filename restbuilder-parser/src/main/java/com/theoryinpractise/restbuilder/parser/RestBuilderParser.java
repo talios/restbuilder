@@ -32,8 +32,6 @@ public class RestBuilderParser extends BaseParser {
                         Ch(';'),
                         Optional(Whitespace()),
                         ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource())),
-
-
                         Optional(Whitespace()),
                         EOI,
                         push(makeRestModel(aPackage.get(), aNamespace.get()))
@@ -51,18 +49,14 @@ public class RestBuilderParser extends BaseParser {
                 Whitespace(),
                 CodeIdentifier(),
                 resourceName.set(match()),
-                Whitespace(),
-                Ch('{'),
-                ZeroOrMore(FirstOf(
+                Block(ZeroOrMore(FirstOf(
                         Whitespace(),
                         Identifier(ElementType.FIELD),
-                        Attribute(ElementType.FIELD),
+                        Attribute(ElementType.RESOURCE),
+                        View(ElementType.VIEW),
                         OperationReference(),
-                        Operation(ElementType.OPERATION))),
+                        Operation(ElementType.OPERATION)))),
 
-                Optional(Whitespace()),
-                Ch('}'),
-                Optional(Whitespace()),
                 push(makeRestResource(resourceName.get()))
         );
     }
@@ -114,25 +108,20 @@ public class RestBuilderParser extends BaseParser {
                 Whitespace(),
                 CodeIdentifier(),
                 operationName.set(match()),
-                Whitespace(),
-                Ch('{'),
-                ZeroOrMore(Attribute(ElementType.OPERATION)),
-                Optional(Whitespace()),
-                Ch('}'),
-                Optional(Whitespace()),
+                Block(ZeroOrMore(Attribute(ElementType.OPERATION))),
                 push(makeRestOperationDefinition(elementType, operationName.get(), comment.get()))
         );
     }
 
     Model makeRestModel(String packageName, String namespace) {
 
-        List<Object> children = popChildValues(ElementType.MODEL, OperationDefinition.class, Resource.class);
+        List<Object> children = popChildValues(OperationDefinition.class, Resource.class);
 
         return new Model(packageName, namespace, children);
     }
 
     Resource makeRestResource(String resourceName) {
-        List children = popChildValues(ElementType.RESOURCE, Identifier.class, Attribute.class, OperationDefinition.class, OperationReference.class);
+        List children = popChildValues(View.class, Identifier.class, ResourceAttribute.class, OperationDefinition.class, OperationReference.class);
 
         return new Resource(
                 getContext().getLevel(),
@@ -142,11 +131,11 @@ public class RestBuilderParser extends BaseParser {
     }
 
     OperationDefinition makeRestOperationDefinition(ElementType elementType, String operationName, String comment) {
-        List<Attribute> attributes = popValuesIntoList(elementType, Attribute.class);
+        List<OperationAttribute> attributes = popValuesIntoList(elementType, OperationAttribute.class);
         return new OperationDefinition(getContext().getLevel(), elementType, comment, operationName, attributes);
     }
 
-    List<Object> popChildValues(ElementType parentType, Class... aClass) {
+    List<Object> popChildValues(Class... aClass) {
         ImmutableSet<Class> matchingClasses = ImmutableSet.copyOf(aClass);
 
         List values = Lists.newArrayList();
@@ -224,14 +213,46 @@ public class RestBuilderParser extends BaseParser {
         );
     }
 
+    Rule View(ElementType elementType) {
+        Var<String> viewName = new Var<String>();
+
+        return Sequence(
+                Optional(CommentBlock(elementType)),
+                Optional(Whitespace()),
+                String("view"),
+                Whitespace(),
+                CodeIdentifier(),
+                viewName.set(match()),
+                Block(OneOrMore(FirstOf(
+                        Whitespace(),
+                        Attribute(ElementType.VIEW)))),
+
+                push(makeView(elementType, viewName.get() )
+        ));
+    }
+
     Identifier makeIdentifier(ElementType elementType, String name, String type) {
         String comment = popCommentLines(elementType);
         return new Identifier(getContext().getLevel(), elementType, comment, name, type);
     }
 
-    Attribute makeAttribute(ElementType elementType, String name, String type) {
+    Field makeAttribute(ElementType elementType, String name, String type) {
         String comment = popCommentLines(elementType);
-        return  new Attribute(getContext().getLevel(), elementType, comment, name, type);
+
+        switch (elementType) {
+            case RESOURCE: return  new ResourceAttribute(getContext().getLevel(), elementType, comment, name, type);
+            case OPERATION: return  new OperationAttribute(getContext().getLevel(), elementType, comment, name, type);
+            case VIEW: return  new ViewAttribute(getContext().getLevel(), elementType, comment, name, type);
+            default: throw new IllegalArgumentException("Unknown elementType " + elementType.name());
+        }
+
+    }
+
+    View makeView(ElementType elementType, String name) {
+        List children = popChildValues(ViewAttribute.class);
+
+        String comment = popCommentLines(elementType);
+        return  new View(getContext().getLevel(), comment, name, children);
     }
 
     Class getClassForElementType(ElementType elementType) {
@@ -246,13 +267,28 @@ public class RestBuilderParser extends BaseParser {
             case FIELD:
                 docClass = Comment.FieldComment.class;
                 break;
+            case VIEW:
+                docClass = Comment.ViewComment.class;
+                break;
         }
         return docClass;
     }
 
     String popCommentLines(ElementType elementType) {
-        List<Comment> commentLines = Lists.reverse(popValuesIntoList(ElementType.OPERATION, getClassForElementType(elementType)));
+        List<Comment> commentLines = Lists.reverse(popValuesIntoList(elementType, getClassForElementType(elementType)));
         return Joiner.on("\n").join(commentLines);
+    }
+
+
+    Rule Block(Rule rule) {
+        return Sequence(
+                Whitespace(),
+                Ch('{'),
+                rule,
+                Optional(Whitespace()),
+                Ch('}'),
+                Optional(Whitespace())
+        );
     }
 
 
@@ -336,9 +372,10 @@ public class RestBuilderParser extends BaseParser {
             case RESOURCE: return new Comment.ResourceComment(level, elementType, comment);
             case FIELD: return new Comment.FieldComment(level, elementType, comment);
             case OPERATION: return new Comment.OperationComment(level, elementType, comment);
+            case VIEW: return new Comment.ViewComment(level, elementType, comment);
         }
 
-        throw new IllegalArgumentException("Unsupport elementType - " + elementType.name());
+        throw new IllegalArgumentException("Unsupported elementType - " + elementType.name());
 
     }
 

@@ -18,5 +18,5 @@ public interface Operation extends Level, FieldHolder {
 
     String getPreamble();
 
-    List<Attribute> getAttributes();
+    List<OperationAttribute> getAttributes();
 }

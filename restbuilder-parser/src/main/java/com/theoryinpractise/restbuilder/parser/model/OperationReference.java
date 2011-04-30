@@ -46,7 +46,7 @@ public class OperationReference implements Operation {
     }
 
     @Override
-    public List<Attribute> getAttributes() {
+    public List<OperationAttribute> getAttributes() {
         return restOperationDefinition.getAttributes();
     }
 }
