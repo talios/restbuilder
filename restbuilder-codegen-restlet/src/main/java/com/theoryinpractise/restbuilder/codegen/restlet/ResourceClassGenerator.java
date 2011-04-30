@@ -246,12 +246,22 @@ public class ResourceClassGenerator extends AbstractGenerator {
         for (Operation operation : resource.resource.getOperations().values()) {
 
             method.body().invoke(generateUpdateLinkHeadersMethod)
-                    .arg(JExpr.invoke("getResponse"))
                     .arg(resource.getUriRef())
-                    .arg(lit(operation.getName())) // TODO This should be a static var on the generated operation class.
+                    .arg(lit("operation " + operation.getName().toLowerCase()))
                     .arg(lit(camel(operation.getName())))
                     .arg(mediaTypes.getMediaType(operation))
                     .arg(codeModel.ref(Method.class).staticRef("POST"));
+
+        }
+
+        for (ModelGenerator.ViewMirror viewMirror : resource.viewClasses.values()) {
+
+            method.body().invoke(generateUpdateLinkHeadersMethod)
+                    .arg(resource.getUriRef())
+                    .arg(lit("view " + viewMirror.getName().toLowerCase()))
+                    .arg(lit(camel(viewMirror.getName())))
+                    .arg(mediaTypes.getMediaType(viewMirror.view))
+                    .arg(codeModel.ref(Method.class).staticRef("GET"));
 
         }
 
@@ -265,7 +275,6 @@ public class ResourceClassGenerator extends AbstractGenerator {
     private JMethod generateUpdateLinkHeadersMethod(JDefinedClass resourceClass, JMethod generateGetHeadersMethod) {
 
         JMethod method = resourceClass.method(JMod.PRIVATE, codeModel.VOID, "updateLinkHeader");
-        JVar response = method.param(codeModel.ref(Response.class), "response");
 //        JVar linkHeader = method.param(stringRef, "header");
         JVar uriVar = method.param(stringRef, "url");
         JVar relVar = method.param(stringRef, "rel");
@@ -282,7 +291,7 @@ public class ResourceClassGenerator extends AbstractGenerator {
                 .arg(methodVar.invoke("getName")));
 
 
-        JVar headers = method.body().decl(formRef, "headers", JExpr.invoke(generateGetHeadersMethod).arg(response));
+        JVar headers = method.body().decl(formRef, "headers", JExpr.invoke(generateGetHeadersMethod).arg(JExpr.invoke("getResponse")));
 
         JVar newLinkHeader = method.body().decl(stringRef, "newLinkHeader", JOp.cond(
                 headers.invoke("getValuesMap").invoke("containsKey").arg("Link"),
