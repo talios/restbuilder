@@ -1,0 +1,29 @@
+package com.example.rbuilder;
+
+namespace example;
+
+/**
+ * Request the provision of a given referenced resource.  Provisioning requires a starting fromDate to be defined.
+ */
+operation provision {
+  attribute string displayName;
+  attribute datetime fromDate;
+}
+
+/**
+ * Request the cancellation of a given resource.  You must give a reason for the cancellation.
+ *
+ * Giving a reason is highly _important_.
+ */
+operation cancellation {
+
+  /**
+   * The date when cancellation should occur.
+   */
+  attribute datetime cancellationDate;
+
+  /**
+   * Reason for the cancellation request.
+   */
+  attribute string comment;
+}

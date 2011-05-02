@@ -3,8 +3,8 @@ package com.theoryinpractise.restbuilder.docbuilder;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 import com.theoryinpractise.restbuilder.parser.model.Field;
-import com.theoryinpractise.restbuilder.parser.model.FieldHolder;
 import org.pegdown.PegDownProcessor;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
@@ -50,13 +50,13 @@ public class AbstractRenderer {
 
     }
 
-    protected Renderable renderSampleResourceDocument(final FieldHolder holder) throws IOException {
+    protected Renderable renderSampleResourceDocument(final BaseClassElement element) throws IOException {
         return new Renderable() {
             @Override
             public void renderOn(HtmlCanvas c) throws IOException {
                 c.pre(class_("code")).code().write("{\n");
 
-                String jsonContent = Joiner.on(",\n").join(Iterables.transform(holder.getFields(), new Function<Field, String>() {
+                String jsonContent = Joiner.on(",\n").join(Iterables.transform(element.getFields(), new Function<Field, String>() {
                     @Override
                     public String apply(Field field) {
                         return "  \"" + field.getName() + "\": \"xxx\"";

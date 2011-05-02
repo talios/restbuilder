@@ -8,9 +8,9 @@ public class OperationDefinition implements Operation {
     private String preamble;
     private String comment;
     private String operationName;
-    private List<Attribute> attributes;
+    private List<OperationAttribute> attributes;
 
-    public OperationDefinition(int level, ElementType elementType,  String comment, String operationName, List<Attribute> attributes) {
+    public OperationDefinition(int level, ElementType elementType,  String comment, String operationName, List<OperationAttribute> attributes) {
         this.level = level;
         this.elementType = elementType;
         this.operationName = operationName;
@@ -54,11 +54,16 @@ public class OperationDefinition implements Operation {
     }
 
     @Override
+    public String getMediaTypeName() {
+        return getName();
+    }
+
+    @Override
     public List<? extends Field> getFields() {
         return attributes;
     }
 
-    public List<Attribute> getAttributes() {
+    public List<OperationAttribute> getAttributes() {
         return attributes;
     }
 }

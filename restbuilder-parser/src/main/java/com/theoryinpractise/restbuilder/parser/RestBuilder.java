@@ -1,10 +1,10 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
-import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.theoryinpractise.restbuilder.parser.model.Model;
+import com.theoryinpractise.restbuilder.parser.model.MultiModel;
 import org.parboiled.Parboiled;
 import org.parboiled.errors.ParseError;
 import org.parboiled.parserunners.ParseRunner;
@@ -12,10 +12,8 @@ import org.parboiled.parserunners.ReportingParseRunner;
 import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 
 
@@ -31,12 +29,14 @@ public class RestBuilder {
         this.tracingEnabled = tracingEnabled;
     }
 
-    public Model buildModel(URL url) throws IOException {
-        return buildModel(com.google.common.io.Resources.newReaderSupplier(url, Charsets.UTF_8));
-    }
+    public Model buildModel(Iterable<InputSupplier<InputStreamReader>> suppliers) throws IOException {
+        List<Model> models = Lists.newArrayList();
+        for (InputSupplier<InputStreamReader> supplier : suppliers) {
+            Model model = buildModel(supplier);
+            models.add(model);
+        }
 
-    public Model buildModel(File file) throws IOException {
-        return buildModel(Files.newReaderSupplier(file, Charsets.UTF_8));
+        return new MultiModel(models).resolve();
     }
 
     private Model buildModel(InputSupplier<InputStreamReader> supplier) throws IOException {
