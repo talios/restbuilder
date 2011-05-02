@@ -32,6 +32,9 @@
                 <!--<version>1.0.1-SNAPSHOT</version>-->
                 <executions>
                     <execution>
+                        <configuration>
+                            <packageName>com.example.rbuilder</packageName>
+                        </configuration>
                         <goals>
                             <goal>generate</goal>
                             <goal>documentation</goal>

@@ -9,6 +9,6 @@ import com.theoryinpractise.restbuilder.parser.model.Model;
  */
 public interface CodeGenerator {
 
-    void generate(JCodeModel jCodeModel, Model model) throws JClassAlreadyExistsException;
+    void generate(JCodeModel jCodeModel, Model model, String packageName) throws JClassAlreadyExistsException;
 
 }

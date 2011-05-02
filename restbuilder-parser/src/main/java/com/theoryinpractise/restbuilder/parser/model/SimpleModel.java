@@ -4,8 +4,7 @@ import java.util.List;
 
 public class SimpleModel extends AbstractModel {
 
-    public SimpleModel(String aPackage, String aNamespace, List<Object> children) {
-        this.aPackage = aPackage;
+    public SimpleModel(String aNamespace, List<Object> children) {
         this.aNamespace = aNamespace;
         for (Object child : children) {
             if (child instanceof Operation) {

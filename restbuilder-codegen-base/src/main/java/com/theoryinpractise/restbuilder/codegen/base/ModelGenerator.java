@@ -47,8 +47,8 @@ public class ModelGenerator extends AbstractGenerator {
         return new ResourceMirror(resource, valueClass, identifierClass, uriField, viewMirrors);
     }
 
-    public CodeGenModelMirror mirrorOf(JCodeModel codeModel, Model model) throws JClassAlreadyExistsException {
-        return new CodeGenModelMirror(codeModel, model);
+    public CodeGenModelMirror mirrorOf(JCodeModel codeModel, Model model, String packageName) throws JClassAlreadyExistsException {
+        return new CodeGenModelMirror(codeModel, model, packageName);
     }
 
 
@@ -62,10 +62,10 @@ public class ModelGenerator extends AbstractGenerator {
 
         private Map<String, ResourceMirror> resourceClasses = Maps.newHashMap();
 
-        public CodeGenModelMirror(JCodeModel codeModel, Model model) throws JClassAlreadyExistsException {
+        public CodeGenModelMirror(JCodeModel codeModel, Model model, String packageName) throws JClassAlreadyExistsException {
             this.model = model;
 
-            this.modelPackage = codeModel._package(model.getPackage());
+            this.modelPackage = codeModel._package(packageName);
 
             for (Operation operation : model.getOperations().values()) {
                 generateOperationClass(codeModel, operation);

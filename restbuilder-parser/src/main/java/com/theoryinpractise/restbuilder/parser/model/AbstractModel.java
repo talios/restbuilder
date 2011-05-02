@@ -6,15 +6,9 @@ import java.util.Map;
 
 public abstract class AbstractModel implements Model  {
 
-    protected String aPackage;
     protected String aNamespace;
     protected Map<String, Operation> operations = Maps.newHashMap();
     protected Map<String, Resource> resources = Maps.newHashMap();
-
-    @Override
-    public String getPackage() {
-        return aPackage;
-    }
 
     @Override
     public String getNamespace() {

@@ -31,9 +31,9 @@ public class RestletCodeGenerator extends AbstractGenerator implements CodeGener
     private ModelGenerator modelGenerator = new ModelGenerator();
     private Map<String, JFieldVar> mediaTypeVars = Maps.newHashMap();
 
-    public void generate(JCodeModel jCodeModel, Model model) throws JClassAlreadyExistsException {
+    public void generate(JCodeModel jCodeModel, Model model, String packageName) throws JClassAlreadyExistsException {
 
-        ModelGenerator.CodeGenModelMirror mirror = modelGenerator.mirrorOf(jCodeModel, model);
+        ModelGenerator.CodeGenModelMirror mirror = modelGenerator.mirrorOf(jCodeModel, model, packageName);
 
 //        modelGenerator.generateModelClasses(jCodeModel, mirror.getPackage(), model);
 

@@ -41,6 +41,14 @@ public class CodeGenerationMojo extends AbstractRestBuilderMojo {
      */
     private File generatedSourceDirectory;
 
+    /**
+     * Location of the generated source files.
+     *
+     * @parameter
+     * @required
+     */
+    private String packageName;
+
     public void execute() throws MojoExecutionException {
 
         try {
@@ -55,7 +63,7 @@ public class CodeGenerationMojo extends AbstractRestBuilderMojo {
             processResourceFilesInDirectory(resourceDir, new ModelProcessor() {
                 public void process(Model model) throws MojoExecutionException {
                     try {
-                        restletCodeGenerator.generate(jCodeModel, model);
+                        restletCodeGenerator.generate(jCodeModel, model, packageName);
 //                        httpServerCodeGenerator.generate(jCodeModel, model);
                     } catch (JClassAlreadyExistsException e) {
                         throw new MojoExecutionException(e.getMessage());

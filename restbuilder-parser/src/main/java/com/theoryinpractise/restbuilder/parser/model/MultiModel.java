@@ -15,7 +15,6 @@ public class MultiModel extends  AbstractModel {
 
     public MultiModel(List<Model> models) {
         this.models = models;
-        aPackage = this.models.iterator().next().getPackage();
         aNamespace = this.models.iterator().next().getNamespace();
         operations = mergeOperations(models).build();
         resources = mergeResources(models).build();

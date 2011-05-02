@@ -33,7 +33,6 @@ public class RestBuilderTest {
                 .isNotNull()
                 .isInstanceOf(Model.class);
 
-        assertThat(model.getPackage()).isEqualTo("com.example.rbuilder");
         assertThat(model.getNamespace()).isEqualTo("example");
         assertThat(model.getOperations()).isNotEmpty().hasSize(2);
 

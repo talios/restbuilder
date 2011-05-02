@@ -28,7 +28,6 @@ public class SplitModelTest {
                 .isNotNull()
                 .isInstanceOf(MultiModel.class);
 
-        assertThat(combined.getPackage()).isEqualTo("com.example.rbuilder");
         assertThat(combined.getNamespace()).isEqualTo("example");
         assertThat(combined.getOperations()).isNotEmpty().hasSize(2);
 

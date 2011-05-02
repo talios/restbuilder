@@ -26,11 +26,11 @@ import static com.sun.codemodel.JMod.*;
 public class HttpHandlerGenerator extends AbstractGenerator implements CodeGenerator {
 
     @Override
-    public void generate(JCodeModel codeModel, Model model) throws JClassAlreadyExistsException {
+    public void generate(JCodeModel codeModel, Model model, String packageName) throws JClassAlreadyExistsException {
 
         JClass stringRef = codeModel.ref(String.class);
 
-        JPackage p = codeModel._package(model.getPackage());
+        JPackage p = codeModel._package(packageName);
 
         String namespaceName = camel(camel(model.getNamespace()) + "Server");
         JDefinedClass c = p.subPackage("httpserver")._class(namespaceName);

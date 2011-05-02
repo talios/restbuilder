@@ -22,25 +22,17 @@ public class RestBuilderParser extends BaseLanguageParser {
 
     Rule Expression() {
 
-        Var<String> aPackage = new Var<String>();
         Var<String> aNamespace = new Var<String>();
 
-        return
-                Sequence(
-                        String("package"),
-                        Whitespace(),
-                        CodeIdentifier(),
-                        aPackage.set(match()),
-                        Ch(';'),
-                        Optional(Whitespace()),
-                        String("namespace"),
-                        Whitespace(),
-                        CodeIdentifier(),
-                        aNamespace.set(match()),
-                        Block(ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource()))),
-                        EOI,
-                        push(makeRestModel(aPackage.get(), aNamespace.get()))
-                );
+        return Sequence(
+                Optional(Whitespace()),
+                String("namespace"),
+                Whitespace(),
+                CodeIdentifier(),
+                aNamespace.set(match()),
+                Block(ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource()))),
+                EOI,
+                push(makeRestModel(aNamespace.get())));
 
     }
 
@@ -99,11 +91,11 @@ public class RestBuilderParser extends BaseLanguageParser {
         );
     }
 
-    Model makeRestModel(String packageName, String namespace) {
+    Model makeRestModel(String namespace) {
 
         List<Object> children = popChildValues(OperationDefinition.class, Resource.class);
 
-        return new SimpleModel(packageName, namespace, children);
+        return new SimpleModel(namespace, children);
     }
 
     Resource makeRestResource(String resourceName) {
@@ -200,8 +192,8 @@ public class RestBuilderParser extends BaseLanguageParser {
                         Whitespace(),
                         Attribute(ElementType.VIEW)))),
 
-                push(makeView(elementType, resourceNameVar.get(), viewName.get() )
-        ));
+                push(makeView(elementType, resourceNameVar.get(), viewName.get())
+                ));
     }
 
     Identifier makeIdentifier(ElementType elementType, String name, String type) {
@@ -213,10 +205,14 @@ public class RestBuilderParser extends BaseLanguageParser {
         String comment = popCommentLines(elementType);
 
         switch (elementType) {
-            case RESOURCE: return  new ResourceAttribute(getContext().getLevel(), comment, name, type);
-            case OPERATION: return  new OperationAttribute(getContext().getLevel(), comment, name, type);
-            case VIEW: return  new ViewAttribute(getContext().getLevel(), comment, name, type);
-            default: throw new IllegalArgumentException("Unknown elementType " + elementType.name());
+            case RESOURCE:
+                return new ResourceAttribute(getContext().getLevel(), comment, name, type);
+            case OPERATION:
+                return new OperationAttribute(getContext().getLevel(), comment, name, type);
+            case VIEW:
+                return new ViewAttribute(getContext().getLevel(), comment, name, type);
+            default:
+                throw new IllegalArgumentException("Unknown elementType " + elementType.name());
         }
 
     }
@@ -225,7 +221,7 @@ public class RestBuilderParser extends BaseLanguageParser {
         List children = popChildValues(ViewAttribute.class);
 
         String comment = popCommentLines(elementType);
-        return  new View(getContext().getLevel(), comment, resourceName, name, children);
+        return new View(getContext().getLevel(), comment, resourceName, name, children);
     }
 
 
