@@ -1,17 +1,13 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.InputSupplier;
+import com.google.common.collect.ImmutableList;
 import com.theoryinpractise.restbuilder.parser.model.*;
-import org.parboiled.common.ImmutableList;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import static com.google.common.io.Resources.getResource;
-import static com.google.common.io.Resources.newReaderSupplier;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.Fail.fail;
 
@@ -24,8 +20,8 @@ public class RestBuilderTest {
         RestBuilder restBuilder = new RestBuilder();
 //        restBuilder.setTracingEnabled(true);
 
-        model = restBuilder.buildModel(ImmutableList.<InputSupplier<InputStreamReader>>of(
-                newReaderSupplier(getResource(RestBuilderTest.class, "/account.rbuilder"), Charsets.UTF_8)));
+        model = restBuilder.buildModel(ImmutableList.<NamedInputSupplier>of(
+                new NamedInputSupplier("/account.rbuilder", getResource(RestBuilderTest.class, "/account.rbuilder"))));
 
     }
 

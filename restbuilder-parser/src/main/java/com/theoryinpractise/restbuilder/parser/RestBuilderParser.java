@@ -10,6 +10,16 @@ import java.util.List;
 
 public class RestBuilderParser extends BaseLanguageParser {
 
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     Rule Expression() {
 
         Var<String> aPackage = new Var<String>();
@@ -73,7 +83,7 @@ public class RestBuilderParser extends BaseLanguageParser {
     }
 
     OperationReference makeOperationReference(String operationName) {
-        return new OperationReference(getContext().getLevel(), ElementType.OPERATION, operationName);
+        return new OperationReference(getContext(), name, operationName);
     }
 
     Rule Operation(ElementType elementType) {
@@ -103,7 +113,8 @@ public class RestBuilderParser extends BaseLanguageParser {
         List children = popChildValues(View.class, Identifier.class, ResourceAttribute.class, OperationDefinition.class, OperationReference.class);
 
         return new Resource(
-                getContext().getLevel(),
+                getContext(),
+                name,
                 popCommentLines(ElementType.RESOURCE),
                 resourceName,
                 children);
@@ -111,7 +122,7 @@ public class RestBuilderParser extends BaseLanguageParser {
 
     OperationDefinition makeRestOperationDefinition(ElementType elementType, String operationName, String comment) {
         List<OperationAttribute> attributes = popValuesIntoList(elementType, OperationAttribute.class);
-        return new OperationDefinition(getContext().getLevel(), elementType, comment, operationName, attributes);
+        return new OperationDefinition(getContext().getLevel(), comment, operationName, attributes);
     }
 
     List<Object> popChildValues(Class... aClass) {
@@ -198,16 +209,16 @@ public class RestBuilderParser extends BaseLanguageParser {
 
     Identifier makeIdentifier(ElementType elementType, String name, String type) {
         String comment = popCommentLines(elementType);
-        return new Identifier(getContext().getLevel(), elementType, comment, name, type);
+        return new Identifier(getContext().getLevel(), comment, name, type);
     }
 
     Field makeAttribute(ElementType elementType, String name, String type) {
         String comment = popCommentLines(elementType);
 
         switch (elementType) {
-            case RESOURCE: return  new ResourceAttribute(getContext().getLevel(), elementType, comment, name, type);
-            case OPERATION: return  new OperationAttribute(getContext().getLevel(), elementType, comment, name, type);
-            case VIEW: return  new ViewAttribute(getContext().getLevel(), elementType, comment, name, type);
+            case RESOURCE: return  new ResourceAttribute(getContext().getLevel(), comment, name, type);
+            case OPERATION: return  new OperationAttribute(getContext().getLevel(), comment, name, type);
+            case VIEW: return  new ViewAttribute(getContext().getLevel(), comment, name, type);
             default: throw new IllegalArgumentException("Unknown elementType " + elementType.name());
         }
 

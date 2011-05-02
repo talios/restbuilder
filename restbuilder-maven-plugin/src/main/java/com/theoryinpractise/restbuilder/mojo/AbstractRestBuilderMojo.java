@@ -3,7 +3,7 @@ package com.theoryinpractise.restbuilder.mojo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
+import com.theoryinpractise.restbuilder.parser.NamedInputSupplier;
 import com.theoryinpractise.restbuilder.parser.RestBuilder;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
@@ -33,16 +33,16 @@ public abstract class AbstractRestBuilderMojo extends AbstractMojo {
 
     protected void processResourceFilesInDirectory(File resourceDir, ModelProcessor modelProcessor) throws IOException, MojoExecutionException {
 
-        List<InputSupplier<InputStreamReader>> files = locateResourceFileSuppliers(resourceDir);
+        List<NamedInputSupplier> files = locateResourceFileSuppliers(resourceDir);
         RestBuilder restBuilder = new RestBuilder();
         Model model = restBuilder.buildModel(files);
         modelProcessor.process(model);
 
     }
 
-    protected List<InputSupplier<InputStreamReader>> locateResourceFileSuppliers(File resourceDir) throws IOException, MojoExecutionException {
+    protected List<NamedInputSupplier> locateResourceFileSuppliers(File resourceDir) throws IOException, MojoExecutionException {
 
-        List<InputSupplier<InputStreamReader>> modelFiles = Lists.newArrayList();
+        List<NamedInputSupplier> modelFiles = Lists.newArrayList();
 
         File[] files = resourceDir.listFiles();
         for (File file : files) {
@@ -51,7 +51,7 @@ public abstract class AbstractRestBuilderMojo extends AbstractMojo {
             } else {
                 if (file.getName().endsWith(".rbuilder")) {
                     getLog().info("Processing resource file " + file.getPath());
-                    modelFiles.add(Files.newReaderSupplier(file, Charsets.UTF_8));
+                    modelFiles.add(new NamedInputSupplier(file.getPath(), Files.newReaderSupplier(file, Charsets.UTF_8)));
                 }
             }
         }

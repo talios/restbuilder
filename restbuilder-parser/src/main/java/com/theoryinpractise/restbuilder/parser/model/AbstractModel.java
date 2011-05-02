@@ -44,7 +44,7 @@ public abstract class AbstractModel implements Model  {
                     if (operationDefinition != null) {
                         reference.setRestOperationDefinition(operationDefinition);
                     } else {
-                        throw new RuntimeException("Undefined operation: " + reference.getName());
+                        throw new RuntimeException(reference.getErrorMessage("Undefined operation: " + reference.getName()));
                     }
 
                 }

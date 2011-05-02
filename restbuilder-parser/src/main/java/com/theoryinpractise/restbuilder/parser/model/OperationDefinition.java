@@ -4,15 +4,13 @@ import java.util.List;
 
 public class OperationDefinition implements Operation {
     private int level;
-    private ElementType elementType;
     private String preamble;
     private String comment;
     private String operationName;
     private List<OperationAttribute> attributes;
 
-    public OperationDefinition(int level, ElementType elementType,  String comment, String operationName, List<OperationAttribute> attributes) {
+    public OperationDefinition(int level, String comment, String operationName, List<OperationAttribute> attributes) {
         this.level = level;
-        this.elementType = elementType;
         this.operationName = operationName;
         this.attributes = attributes;
 
@@ -34,10 +32,6 @@ public class OperationDefinition implements Operation {
 
     public int getLevel() {
         return level;
-    }
-
-    public ElementType getElementType() {
-        return elementType;
     }
 
     public String getComment() {

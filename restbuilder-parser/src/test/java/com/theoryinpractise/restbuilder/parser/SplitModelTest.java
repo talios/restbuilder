@@ -1,19 +1,15 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.InputSupplier;
+import com.google.common.collect.ImmutableList;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.MultiModel;
 import com.theoryinpractise.restbuilder.parser.model.Operation;
 import com.theoryinpractise.restbuilder.parser.model.Resource;
-import org.parboiled.common.ImmutableList;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import static com.google.common.io.Resources.getResource;
-import static com.google.common.io.Resources.newReaderSupplier;
 import static org.fest.assertions.Assertions.assertThat;
 
 public class SplitModelTest {
@@ -23,9 +19,9 @@ public class SplitModelTest {
 
         RestBuilder restBuilder = new RestBuilder();
 
-        Model combined = restBuilder.buildModel(ImmutableList.<InputSupplier<InputStreamReader>>of(
-                newReaderSupplier(getResource(SplitModelTest.class, "/splitmodel/account.rbuilder"), Charsets.UTF_8),
-                newReaderSupplier(getResource(SplitModelTest.class, "/splitmodel/operations.rbuilder"), Charsets.UTF_8)));
+        Model combined = restBuilder.buildModel(ImmutableList.<NamedInputSupplier>of(
+                new NamedInputSupplier("/account.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/account.rbuilder")),
+                new NamedInputSupplier("/spltmodel/operations.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/operations.rbuilder"))));
 
         assertThat(combined)
                 .describedAs("A restbuilder model object")

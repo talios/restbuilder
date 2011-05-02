@@ -7,15 +7,13 @@ public abstract class Field implements Level {
     private static int fieldCount = 0;
 
     private int level;
-    private ElementType elementType;
     private Integer order;
     private String comment;
     private String attributeType;
     private String attributeName;
 
-    public Field(int level, ElementType elementType, String comment, String attributeType, String attributeName) {
+    public Field(int level, String comment, String attributeType, String attributeName) {
         this.level = level;
-        this.elementType = elementType;
         this.order = Integer.valueOf(fieldCount++);
         this.comment = comment;
         this.attributeType = attributeType;
@@ -24,11 +22,6 @@ public abstract class Field implements Level {
 
     public int getLevel() {
         return level;
-    }
-
-
-    public ElementType getElementType() {
-        return elementType;
     }
 
     public Integer getOrder() {

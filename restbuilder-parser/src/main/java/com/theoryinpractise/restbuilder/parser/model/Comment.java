@@ -2,9 +2,8 @@ package com.theoryinpractise.restbuilder.parser.model;
 
 public abstract class Comment implements Level {
 
-    public Comment(int level, ElementType elementType, String comment) {
+    public Comment(int level, String comment) {
         this.level = level;
-        this.elementType = elementType;
         this.comment = comment;
     }
 
@@ -12,12 +11,6 @@ public abstract class Comment implements Level {
 
     public int getLevel() {
         return level;
-    }
-
-    private ElementType elementType;
-
-    public ElementType getElementType() {
-        return elementType;
     }
 
     private String comment;
@@ -32,26 +25,26 @@ public abstract class Comment implements Level {
 
 
     public static class OperationComment extends Comment {
-        public OperationComment(int level, ElementType elementType, String comment) {
-            super(level, elementType, comment);
+        public OperationComment(int level, String comment) {
+            super(level, comment);
         }
     }
 
     public static class FieldComment extends Comment {
-        public FieldComment(int level, ElementType elementType, String comment) {
-            super(level, elementType, comment);
+        public FieldComment(int level, String comment) {
+            super(level, comment);
         }
     }
 
     public static class ResourceComment extends Comment {
-        public ResourceComment(int level, ElementType elementType, String comment) {
-            super(level, elementType, comment);
+        public ResourceComment(int level, String comment) {
+            super(level, comment);
         }
     }
 
     public static class ViewComment extends Comment {
-        public ViewComment(int level, ElementType elementType, String comment) {
-            super(level, elementType, comment);
+        public ViewComment(int level, String comment) {
+            super(level, comment);
         }
     }
 

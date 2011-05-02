@@ -5,14 +5,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.theoryinpractise.restbuilder.parser.BaseClassElement;
+import org.parboiled.Context;
 
 import java.util.List;
 import java.util.Map;
 
-public class Resource implements Level, BaseClassElement {
+public class Resource extends Node implements BaseClassElement {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
-    private int level;
-    private ElementType elementType;
     private String preamble;
     private String comment;
     private String resourceName;
@@ -21,9 +20,8 @@ public class Resource implements Level, BaseClassElement {
     private Map<String,Operation> operations = Maps.newHashMap();
     private Map<String,View> views = Maps.newHashMap();
 
-    public Resource(int level, String comment, String resourceName, List children) {
-        this.level = level;
-        this.elementType = ElementType.MODEL;
+    public Resource(Context context, String filename, String comment, String resourceName, List children) {
+        super(context, filename);
 
         if (comment != null) {
             int index = comment.indexOf("\n\n");
@@ -56,14 +54,6 @@ public class Resource implements Level, BaseClassElement {
                 views.put(view.getName(), view);
             }
         }
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public ElementType getElementType() {
-        return elementType;
     }
 
     public String getName() {

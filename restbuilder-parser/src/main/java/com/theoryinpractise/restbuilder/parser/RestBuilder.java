@@ -2,7 +2,6 @@ package com.theoryinpractise.restbuilder.parser;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
-import com.google.common.io.InputSupplier;
 import com.theoryinpractise.restbuilder.parser.model.Model;
 import com.theoryinpractise.restbuilder.parser.model.MultiModel;
 import org.parboiled.Parboiled;
@@ -13,7 +12,6 @@ import org.parboiled.parserunners.TracingParseRunner;
 import org.parboiled.support.ParsingResult;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 
@@ -29,9 +27,9 @@ public class RestBuilder {
         this.tracingEnabled = tracingEnabled;
     }
 
-    public Model buildModel(Iterable<InputSupplier<InputStreamReader>> suppliers) throws IOException {
+    public Model buildModel(Iterable<NamedInputSupplier> suppliers) throws IOException {
         List<Model> models = Lists.newArrayList();
-        for (InputSupplier<InputStreamReader> supplier : suppliers) {
+        for (NamedInputSupplier supplier : suppliers) {
             Model model = buildModel(supplier);
             models.add(model);
         }
@@ -39,7 +37,7 @@ public class RestBuilder {
         return new MultiModel(models).resolve();
     }
 
-    private Model buildModel(InputSupplier<InputStreamReader> supplier) throws IOException {
+    private Model buildModel(NamedInputSupplier supplier) throws IOException {
 
         RestBuilderParser parser = Parboiled.createParser(RestBuilderParser.class);
 
@@ -47,6 +45,7 @@ public class RestBuilder {
                 ? new TracingParseRunner(parser.Expression())
                 : new ReportingParseRunner(parser.Expression());
 
+        parser.setName(supplier.getName());
         ParsingResult result = parseRunner.run(CharStreams.toString(supplier));
 
         if (result.hasErrors()) {

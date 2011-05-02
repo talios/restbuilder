@@ -1,25 +1,16 @@
 package com.theoryinpractise.restbuilder.parser.model;
 
+import org.parboiled.Context;
+
 import java.util.List;
 
-public class OperationReference implements Operation {
-    private int level;
-    private ElementType elementType;
+public class OperationReference extends Node implements Operation {
     private Operation restOperationDefinition;
     private String name;
 
-    public OperationReference(int level,  ElementType elementType, String name) {
-        this.level = level;
-        this.elementType = elementType;
+    public OperationReference(Context context,  String filename, String name) {
+        super(context, filename);
         this.name = name;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public ElementType getElementType() {
-        return elementType;
     }
 
     public void setRestOperationDefinition(Operation restOperationDefinition) {

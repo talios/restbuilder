@@ -49,7 +49,9 @@ public class BaseLanguageParser extends BaseParser {
     String popCommentLines(ElementType elementType) {
         List<Comment> commentLines = Lists.reverse(popValuesIntoList(elementType, getClassForElementType(elementType)));
         return Joiner.on("\n").join(commentLines);
-    }Rule Block(Rule rule) {
+    }
+
+    Rule Block(Rule rule) {
         return Sequence(
                 Whitespace(),
                 Ch('{'),
@@ -137,10 +139,14 @@ public class BaseLanguageParser extends BaseParser {
     Comment newComment(int level, ElementType elementType, String comment) {
 
         switch (elementType) {
-            case RESOURCE: return new Comment.ResourceComment(level, elementType, comment);
-            case FIELD: return new Comment.FieldComment(level, elementType, comment);
-            case OPERATION: return new Comment.OperationComment(level, elementType, comment);
-            case VIEW: return new Comment.ViewComment(level, elementType, comment);
+            case RESOURCE:
+                return new Comment.ResourceComment(level, comment);
+            case FIELD:
+                return new Comment.FieldComment(level, comment);
+            case OPERATION:
+                return new Comment.OperationComment(level, comment);
+            case VIEW:
+                return new Comment.ViewComment(level, comment);
         }
 
         throw new IllegalArgumentException("Unsupported elementType - " + elementType.name());
