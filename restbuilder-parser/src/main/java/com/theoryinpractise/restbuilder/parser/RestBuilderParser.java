@@ -73,26 +73,7 @@ public class RestBuilderParser extends BaseLanguageParser {
     }
 
     OperationReference makeOperationReference(String operationName) {
-
-        OperationDefinition restOperationDefinition = null;
-        for (Object o : getContext().getValueStack()) {
-            if (o instanceof OperationDefinition) {
-                OperationDefinition op = (OperationDefinition) o;
-                if (op.getName().equals(operationName) && op.getLevel() < getContext().getLevel()) {
-                    restOperationDefinition = op;
-                    break;
-                }
-            }
-        }
-
-        if (restOperationDefinition == null) {
-            throw new IllegalStateException(String.format(
-                    "operation reference to unknown operation '%s' on line %s",
-                    operationName,
-                    getContext().getInputBuffer().getPosition(getContext().getMatchStartIndex()).line));
-        }
-
-        return new OperationReference(getContext().getLevel(), ElementType.OPERATION, restOperationDefinition);
+        return new OperationReference(getContext().getLevel(), ElementType.OPERATION, operationName);
     }
 
     Rule Operation(ElementType elementType) {
@@ -115,7 +96,7 @@ public class RestBuilderParser extends BaseLanguageParser {
 
         List<Object> children = popChildValues(OperationDefinition.class, Resource.class);
 
-        return new Model(packageName, namespace, children);
+        return new SimpleModel(packageName, namespace, children);
     }
 
     Resource makeRestResource(String resourceName) {

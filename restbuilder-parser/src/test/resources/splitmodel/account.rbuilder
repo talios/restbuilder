@@ -1,0 +1,28 @@
+package com.example.rbuilder;
+
+namespace example;
+
+/**
+ * This is the account resource.
+ *
+ * The account resource is a billable user in the system.
+ */
+resource account {
+
+  identifier integer id; // The key field
+  attribute string displayName;
+  attribute datetime fromDate;
+  attribute datetime thruDate;
+
+  view simple {
+    attribute string displayName; // identifiers from the account resource are implied.
+  }
+
+  operation cancellation;
+
+  operation notify {
+    attribute string message;
+  }
+
+}
+
