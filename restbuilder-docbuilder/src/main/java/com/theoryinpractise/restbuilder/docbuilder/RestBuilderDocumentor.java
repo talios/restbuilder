@@ -4,10 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
-import com.theoryinpractise.restbuilder.parser.model.Model;
-import com.theoryinpractise.restbuilder.parser.model.Operation;
-import com.theoryinpractise.restbuilder.parser.model.OperationDefinition;
-import com.theoryinpractise.restbuilder.parser.model.Resource;
+import com.theoryinpractise.restbuilder.parser.model.*;
 import org.rendersnake.HtmlCanvas;
 import org.rendersnake.Renderable;
 
@@ -49,6 +46,7 @@ public class RestBuilderDocumentor {
                 new File(outputBase, resource.getName() + ".html"),
                 capitalize(resource.getName()),
                 resourceRenderer.renderResource(model, resource));
+
     }
 
     private void renderOperation(File outputBase, Model model, OperationRenderer operationRenderer, Operation operation) throws IOException {

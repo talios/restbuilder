@@ -1,15 +1,10 @@
 package com.theoryinpractise.restbuilder.parser.model;
 
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
+
 import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: amrk
- * Date: 9/04/11
- * Time: 10:38 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface Operation extends Level, FieldHolder {
+public interface Operation extends Level, BaseClassElement {
     int getLevel();
 
     String getName();
@@ -18,5 +13,5 @@ public interface Operation extends Level, FieldHolder {
 
     String getPreamble();
 
-    List<Attribute> getAttributes();
+    List<OperationAttribute> getAttributes();
 }

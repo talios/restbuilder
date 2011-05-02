@@ -64,5 +64,11 @@ resource account {
     attribute string message;
   }
 
+  view simple {
+    attribute string displayName;
+    attribute string initials; // Also return initials.
+  }
+
+
 }
 

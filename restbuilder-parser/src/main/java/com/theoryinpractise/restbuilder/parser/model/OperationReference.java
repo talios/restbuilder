@@ -31,6 +31,11 @@ public class OperationReference implements Operation {
     }
 
     @Override
+    public String getMediaTypeName() {
+        return getName();
+    }
+
+    @Override
     public String getComment() {
         return restOperationDefinition.getComment();
     }
@@ -46,7 +51,7 @@ public class OperationReference implements Operation {
     }
 
     @Override
-    public List<Attribute> getAttributes() {
+    public List<OperationAttribute> getAttributes() {
         return restOperationDefinition.getAttributes();
     }
 }

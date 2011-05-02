@@ -49,4 +49,10 @@ public abstract class Comment implements Level {
         }
     }
 
+    public static class ViewComment extends Comment {
+        public ViewComment(int level, ElementType elementType, String comment) {
+            super(level, elementType, comment);
+        }
+    }
+
 }

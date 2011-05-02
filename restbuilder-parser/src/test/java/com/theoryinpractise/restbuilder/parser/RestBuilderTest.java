@@ -53,7 +53,7 @@ public class RestBuilderTest {
                 assertThat(operation.getPreamble()).contains("Request the cancellation of a given resource.");
 
 
-                Attribute attribute = operation.getAttributes().iterator().next();
+                OperationAttribute attribute = operation.getAttributes().iterator().next();
 
                 assertThat(attribute.getName()).isEqualTo("thruDate");
                 assertThat(attribute.getComment()).isEqualTo("The requested cancellation date.");

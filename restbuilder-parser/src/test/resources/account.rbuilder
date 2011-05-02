@@ -27,6 +27,10 @@ resource account {
   attribute datetime fromDate;
   attribute datetime thruDate;
 
+  view simple {
+    attribute string displayName; // identifiers from the account resource are implied.
+  }
+
   operation cancellation;
 
   operation notify {

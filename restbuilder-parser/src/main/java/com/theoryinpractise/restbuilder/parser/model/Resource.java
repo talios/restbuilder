@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.theoryinpractise.restbuilder.parser.BaseClassElement;
 
 import java.util.List;
 import java.util.Map;
 
-public class Resource implements Level {
+public class Resource implements Level, BaseClassElement {
     public static final Ordering<Field> FIELD_ORDERING = Ordering.from(new Field.FieldCountComparator());
     private int level;
     private ElementType elementType;
@@ -16,8 +17,9 @@ public class Resource implements Level {
     private String comment;
     private String resourceName;
     private List<Identifier> identifiers = Lists.newArrayList();
-    private List<Attribute> attributes = Lists.newArrayList();
+    private List<ResourceAttribute> attributes = Lists.newArrayList();
     private Map<String,Operation> operations = Maps.newHashMap();
+    private Map<String,View> views = Maps.newHashMap();
 
     public Resource(int level, String comment, String resourceName, List children) {
         this.level = level;
@@ -42,12 +44,16 @@ public class Resource implements Level {
             if (child instanceof Identifier) {
                 identifiers.add((Identifier) child);
             }
-            if (child instanceof Attribute) {
-                attributes.add((Attribute) child);
+            if (child instanceof ResourceAttribute) {
+                attributes.add((ResourceAttribute) child);
             }
             if (child instanceof Operation) {
                 Operation operation = (Operation) child;
                 operations.put(operation.getName(), operation);
+            }
+            if (child instanceof View) {
+                View view = (View) child;
+                views.put(view.getName(), view);
             }
         }
     }
@@ -64,6 +70,11 @@ public class Resource implements Level {
         return resourceName;
     }
 
+    @Override
+    public String getMediaTypeName() {
+        return getName();
+    }
+
     public String getPreamble() {
         return preamble;
     }
@@ -76,7 +87,7 @@ public class Resource implements Level {
         return FIELD_ORDERING.sortedCopy(identifiers);
     }
 
-    public List<Attribute> getAttributes() {
+    public List<ResourceAttribute> getAttributes() {
         return FIELD_ORDERING.sortedCopy(attributes);
     }
 
@@ -92,5 +103,7 @@ public class Resource implements Level {
         return operations;
     }
 
-
+    public Map<String, View> getViews() {
+        return views;
+    }
 }

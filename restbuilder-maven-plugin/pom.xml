@@ -64,6 +64,11 @@
         </dependency>
         <dependency>
             <groupId>com.theoryinpractise.restbuilder</groupId>
+            <artifactId>restbuilder-codegen-httpserver</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.theoryinpractise.restbuilder</groupId>
             <artifactId>restbuilder-docbuilder</artifactId>
             <version>1.0.1-SNAPSHOT</version>
         </dependency>
