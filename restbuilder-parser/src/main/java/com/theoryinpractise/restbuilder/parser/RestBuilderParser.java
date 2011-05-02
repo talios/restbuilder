@@ -37,10 +37,7 @@ public class RestBuilderParser extends BaseLanguageParser {
                         Whitespace(),
                         CodeIdentifier(),
                         aNamespace.set(match()),
-                        Ch(';'),
-                        Optional(Whitespace()),
-                        ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource())),
-                        Optional(Whitespace()),
+                        Block(ZeroOrMore(FirstOf(Operation(ElementType.MODEL), Resource()))),
                         EOI,
                         push(makeRestModel(aPackage.get(), aNamespace.get()))
                 );

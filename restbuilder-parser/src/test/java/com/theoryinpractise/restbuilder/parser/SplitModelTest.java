@@ -20,7 +20,7 @@ public class SplitModelTest {
         RestBuilder restBuilder = new RestBuilder();
 
         Model combined = restBuilder.buildModel(ImmutableList.<NamedInputSupplier>of(
-                new NamedInputSupplier("/account.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/account.rbuilder")),
+                new NamedInputSupplier("/splitmodel/account.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/account.rbuilder")),
                 new NamedInputSupplier("/spltmodel/operations.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/operations.rbuilder"))));
 
         assertThat(combined)

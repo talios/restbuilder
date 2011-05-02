@@ -1,48 +1,49 @@
 package com.example.rbuilder;
 
-namespace example;
-
-/**
- * This is the account resource.
- *
- * An account is a *billable* entity in the system, think of them as customers, resellers, or someone
- * else we bill.
- *
- * Comments are full _markdown_ documents, as such you can also have code blocks:
- *
- *     This is a code block.
- *     This is still a code block.
- *
- *  * This however is a bullet point.
- *
- * This gives us a good means of writing documentation for resources.
- *
- */
-resource account {
-  identifier integer id;
+namespace example {
 
   /**
-   * The displayable name of the account.
+   * This is the account resource.
+   *
+   * An account is a *billable* entity in the system, think of them as customers, resellers, or someone
+   * else we bill.
+   *
+   * Comments are full _markdown_ documents, as such you can also have code blocks:
+   *
+   *     This is a code block.
+   *     This is still a code block.
+   *
+   *  * This however is a bullet point.
+   *
+   * This gives us a good means of writing documentation for resources.
+   *
    */
-  attribute string displayName;
+  resource account {
+    identifier integer id;
 
-  /**
-   * The date the account was created.
-   */
-  attribute datetime fromDate;
-  attribute datetime thruDate;
-
-  operation cancellation;
-
-  operation notify {
-    attribute string message;
-  }
-
-  view simple {
+    /**
+     * The displayable name of the account.
+     */
     attribute string displayName;
-    attribute string initials; // Also return initials.
-  }
 
+    /**
+     * The date the account was created.
+     */
+    attribute datetime fromDate;
+    attribute datetime thruDate;
+
+    operation cancellation;
+
+    operation notify {
+      attribute string message;
+    }
+
+    view simple {
+      attribute string displayName;
+      attribute string initials; // Also return initials.
+    }
+
+  }
 
 }
 

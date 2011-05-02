@@ -1,40 +1,42 @@
 package com.example.rbuilder;
 
-namespace example;
+namespace example {
 
-/**
- * Request the provision of a given referenced resource.  Provisioning requires a starting fromDate to be defined.
- */
-operation provision {
-  attribute string displayName;
-  attribute datetime fromDate;
-}
-
-// Request the cancellation of a given resource.
-operation cancellation {
-  attribute datetime thruDate; // The requested cancellation date.
-}
-
-/**
- * This is the account resource.
- *
- * The account resource is a billable user in the system.
- */
-resource account {
-
-  identifier integer id; // The key field
-  attribute string displayName;
-  attribute datetime fromDate;
-  attribute datetime thruDate;
-
-  view simple {
-    attribute string displayName; // identifiers from the account resource are implied.
+  /**
+   * Request the provision of a given referenced resource.  Provisioning requires a starting fromDate to be defined.
+   */
+  operation provision {
+    attribute string displayName;
+    attribute datetime fromDate;
   }
 
-  operation cancellation;
+  // Request the cancellation of a given resource.
+  operation cancellation {
+    attribute datetime thruDate; // The requested cancellation date.
+  }
 
-  operation notify {
-    attribute string message;
+  /**
+   * This is the account resource.
+   *
+   * The account resource is a billable user in the system.
+   */
+  resource account {
+
+    identifier integer id; // The key field
+    attribute string displayName;
+    attribute datetime fromDate;
+    attribute datetime thruDate;
+
+    view simple {
+      attribute string displayName; // identifiers from the account resource are implied.
+    }
+
+    operation cancellation;
+
+    operation notify {
+      attribute string message;
+    }
+
   }
 
 }
