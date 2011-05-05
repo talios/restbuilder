@@ -36,6 +36,38 @@ namespace example {
       attribute string message;
     }
 
+
+    resource status {
+        view default {
+            attribute string statusCode;
+        }
+    }
+
+    resource collection user {
+
+      view simple {
+        attribute string fullName;
+      }
+
+      operation provision;
+
+      operation create {
+        attribute string firstName;
+        attribute string lastName;
+        attribute string email;
+      }
+    }
+  }
+
+
+
+  resource user {
+
+    identifier integer id;
+    attribute string firstName;
+    attribute string lastName;
+    attribute string email;
+
   }
 
 }

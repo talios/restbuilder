@@ -1,6 +1,7 @@
 package com.theoryinpractise.restbuilder.parser;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.theoryinpractise.restbuilder.parser.model.Comment;
 import com.theoryinpractise.restbuilder.parser.model.ElementType;
@@ -13,18 +14,37 @@ import java.util.List;
 
 public class BaseLanguageParser extends BaseParser {
 
-    protected <T> List<T> popValuesIntoList(ElementType parentType, Class<T> aClass) {
+    List<Object> popChildValues(Class... aClass) {
+
+        ImmutableList.Builder<Object> valueBuilder = ImmutableList.builder();
+        for (Class aClas : aClass) {
+            valueBuilder.addAll(popValuesIntoList(aClas));
+        }
+
+        return valueBuilder.build();
+
+    }
+
+    protected <T> List<T> popValuesIntoList(Class<T> aClass) {
+
+        List<T> allAttributes = ImmutableList.copyOf(getContext().getValueStack());
         List<T> attributes = Lists.newArrayList();
-        while (!getContext().getValueStack().isEmpty()) {
-            Object o = peek();
+
+        for (Object o : allAttributes) {
             if (o instanceof Level && ((Level) o).getLevel() > getContext().getLevel() && aClass.isAssignableFrom(o.getClass())) {
-                pop();
                 attributes.add((T) o);
-            } else {
-                break;
             }
         }
-        return attributes;
+
+        getContext().getValueStack().clear();
+
+        for (T remainingAttribute : allAttributes) {
+            if (!attributes.contains(remainingAttribute)) {
+                getContext().getValueStack().push(remainingAttribute);
+            }
+        }
+
+        return Lists.newArrayList(attributes);
     }
 
     Class getClassForElementType(ElementType elementType) {
@@ -35,6 +55,9 @@ public class BaseLanguageParser extends BaseParser {
                 break;
             case RESOURCE:
                 docClass = Comment.ResourceComment.class;
+                break;
+            case RESOURCE_REFERENCE:
+                docClass = Comment.ResourceReferenceComment.class;
                 break;
             case FIELD:
                 docClass = Comment.FieldComment.class;
@@ -47,7 +70,7 @@ public class BaseLanguageParser extends BaseParser {
     }
 
     String popCommentLines(ElementType elementType) {
-        List<Comment> commentLines = Lists.reverse(popValuesIntoList(elementType, getClassForElementType(elementType)));
+        List<Comment> commentLines = Lists.reverse(popValuesIntoList(getClassForElementType(elementType)));
         return Joiner.on("\n").join(commentLines);
     }
 
@@ -133,7 +156,7 @@ public class BaseLanguageParser extends BaseParser {
     }
 
     Rule CommentContent() {
-        return OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@,.:*_ \t")));
+        return OneOrMore(FirstOf(Alpha(), AnyOf("/\'\"@{}-,.:*_ \t")));
     }
 
     Comment newComment(int level, ElementType elementType, String comment) {
@@ -141,6 +164,8 @@ public class BaseLanguageParser extends BaseParser {
         switch (elementType) {
             case RESOURCE:
                 return new Comment.ResourceComment(level, comment);
+            case RESOURCE_REFERENCE:
+                return new Comment.ResourceReferenceComment(level, comment);
             case FIELD:
                 return new Comment.FieldComment(level, comment);
             case OPERATION:

@@ -18,6 +18,7 @@ public class SplitModelTest {
     public void testSplitModels() throws IOException {
 
         RestBuilder restBuilder = new RestBuilder();
+        restBuilder.setTracingEnabled(true);
 
         Model combined = restBuilder.buildModel(ImmutableList.<NamedInputSupplier>of(
                 new NamedInputSupplier("/splitmodel/account.rbuilder", getResource(RestBuilderTest.class, "/splitmodel/account.rbuilder")),

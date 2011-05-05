@@ -18,7 +18,7 @@ public class RestBuilderTest {
     @BeforeMethod
     public void init() throws IOException {
         RestBuilder restBuilder = new RestBuilder();
-//        restBuilder.setTracingEnabled(true);
+        restBuilder.setTracingEnabled(true);
 
         model = restBuilder.buildModel(ImmutableList.<NamedInputSupplier>of(
                 new NamedInputSupplier("/account.rbuilder", getResource(RestBuilderTest.class, "/account.rbuilder"))));

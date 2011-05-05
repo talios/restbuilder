@@ -42,6 +42,12 @@ public abstract class Comment implements Level {
         }
     }
 
+    public static class ResourceReferenceComment extends Comment {
+        public ResourceReferenceComment(int level, String comment) {
+            super(level, comment);
+        }
+    }
+
     public static class ViewComment extends Comment {
         public ViewComment(int level, String comment) {
             super(level, comment);

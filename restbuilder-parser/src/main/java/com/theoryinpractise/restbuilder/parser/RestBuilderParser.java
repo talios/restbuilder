@@ -1,7 +1,5 @@
 package com.theoryinpractise.restbuilder.parser;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.theoryinpractise.restbuilder.parser.model.*;
 import org.parboiled.Rule;
 import org.parboiled.support.Var;
@@ -52,9 +50,33 @@ public class RestBuilderParser extends BaseLanguageParser {
                         Attribute(ElementType.RESOURCE),
                         View(ElementType.VIEW, resourceName),
                         OperationReference(),
-                        Operation(ElementType.OPERATION)))),
+                        Operation(ElementType.OPERATION),
+                        ResourceCollectionReference()
+                        ))),
 
                 push(makeRestResource(resourceName.get()))
+        );
+    }
+
+    Rule ResourceCollectionReference() {
+        Var<String> resourceName = new Var<String>();
+        Var<Boolean> unary = new Var<Boolean>(Boolean.FALSE);
+
+        return Sequence(
+                Optional(CommentBlock(ElementType.RESOURCE_REFERENCE)),
+                Optional(Whitespace()),
+                String("resource"),
+                Optional(String(" collection"), unary.set(Boolean.TRUE)),
+                Whitespace(),
+                CodeIdentifier(),
+                resourceName.set(match()),
+                Block(ZeroOrMore(FirstOf(
+                        Whitespace(),
+                        View(ElementType.VIEW, resourceName),
+                        OperationReference(),
+                        Operation(ElementType.OPERATION)
+                ))),
+                push(makeRestResourceReference(resourceName.get(), unary.get()))
         );
     }
 
@@ -101,46 +123,25 @@ public class RestBuilderParser extends BaseLanguageParser {
     Resource makeRestResource(String resourceName) {
         List children = popChildValues(View.class, Identifier.class, ResourceAttribute.class, OperationDefinition.class, OperationReference.class);
 
-        return new Resource(
-                getContext(),
-                name,
-                popCommentLines(ElementType.RESOURCE),
-                resourceName,
-                children);
+        return new Resource(getContext(), name, popCommentLines(ElementType.RESOURCE), resourceName, children);
+    }
+
+    ResourceReference makeRestResourceReference(String resourceName, boolean unary) {
+        List children = popChildValues(View.class, OperationDefinition.class, OperationReference.class);
+        return new ResourceReference(getContext(), name, unary, popCommentLines(ElementType.RESOURCE_REFERENCE), resourceName, children);
     }
 
     OperationDefinition makeRestOperationDefinition(ElementType elementType, String operationName, String comment) {
-        List<OperationAttribute> attributes = popValuesIntoList(elementType, OperationAttribute.class);
+        List<OperationAttribute> attributes = popValuesIntoList(OperationAttribute.class);
         return new OperationDefinition(getContext().getLevel(), comment, operationName, attributes);
     }
-
-    List<Object> popChildValues(Class... aClass) {
-        ImmutableSet<Class> matchingClasses = ImmutableSet.copyOf(aClass);
-
-        List values = Lists.newArrayList();
-        while (!getContext().getValueStack().isEmpty()) {
-            Object o = peek();
-            if (matchingClasses.contains(o.getClass())) {
-                if (o instanceof Level && ((Level) o).getLevel() > getContext().getLevel()) {
-                    pop();
-                    values.add(o);
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
-        return values;
-    }
-
 
     Rule Identifier(ElementType elementType) {
         Var<String> attributeName = new Var<String>();
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(CommentBlock(elementType)),
+                Optional(CommentBlock(ElementType.FIELD)),
                 Optional(Whitespace()),
                 String("identifier"),
                 Whitespace(),
@@ -151,7 +152,7 @@ public class RestBuilderParser extends BaseLanguageParser {
                 attributeName.set(match()),
                 Ch(';'),
                 Optional(Whitespace()),
-                Optional(SlashCommentLine(elementType)),
+                Optional(SlashCommentLine(ElementType.FIELD)),
 
                 push(makeIdentifier(elementType, attributeName.get(), attributeType.get()))
         );
@@ -162,7 +163,7 @@ public class RestBuilderParser extends BaseLanguageParser {
         Var<String> attributeType = new Var<String>();
 
         return Sequence(
-                Optional(CommentBlock(elementType)),
+                Optional(CommentBlock(ElementType.FIELD)),
                 Optional(Whitespace()),
                 String("attribute"),
                 Whitespace(),
@@ -173,7 +174,7 @@ public class RestBuilderParser extends BaseLanguageParser {
                 attributeName.set(match()),
                 Ch(';'),
                 Optional(Whitespace()),
-                Optional(SlashCommentLine(elementType)),
+                Optional(SlashCommentLine(ElementType.FIELD)),
                 push(makeAttribute(elementType, attributeName.get(), attributeType.get()))
         );
     }
@@ -202,11 +203,13 @@ public class RestBuilderParser extends BaseLanguageParser {
     }
 
     Field makeAttribute(ElementType elementType, String name, String type) {
-        String comment = popCommentLines(elementType);
+        String comment = popCommentLines(ElementType.FIELD);
 
         switch (elementType) {
             case RESOURCE:
                 return new ResourceAttribute(getContext().getLevel(), comment, name, type);
+            case RESOURCE_REFERENCE:
+                return new ResourceReferenceAttribute(getContext().getLevel(), comment, name, type);
             case OPERATION:
                 return new OperationAttribute(getContext().getLevel(), comment, name, type);
             case VIEW:
